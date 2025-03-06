@@ -13,11 +13,7 @@ class ExpenseController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Expense::with('category');
-
-        if ($request->has('category_id') && $request->category_id != '') {
-            $query->where('category_id', $request->category_id);
-        }
+        $query = Expense::with('category')->where('user_id', auth()->id());
 
         $expenses = $query->get();
         $categories = Category::all();

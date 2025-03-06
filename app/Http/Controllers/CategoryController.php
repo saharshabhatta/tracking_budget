@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\UserCategory;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
@@ -36,6 +37,12 @@ class CategoryController extends Controller
 
         $category = Category::create([
             'name' => $request->input('name'),
+        ]);
+
+        $user_category=UserCategory::create([
+            'user_id'=>auth()->id(),
+            'spending_percentage' => $request->input('spending_percentage'),
+            'category_id'=>$category->id,
         ]);
 
         return redirect('/categories')->with('success', 'Category created successfully!');

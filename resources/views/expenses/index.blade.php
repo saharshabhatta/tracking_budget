@@ -11,23 +11,23 @@
 <div class="container mt-5">
     <h1 class="text-center mb-4">Expenses</h1>
 
-    <form method="GET" action="{{ route('expenses.index') }}" class="mb-4">
-        <div class="row">
-            <div class="col-md-4">
-                <select name="category_id" class="form-control">
-                    <option value="">-- Filter by Category --</option>
-                    @foreach($categories as $category)
-                        <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
-                            {{ $category->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-primary">Filter</button>
-            </div>
-        </div>
-    </form>
+{{--    <form method="GET" action="{{ route('expenses.index') }}" class="mb-4">--}}
+{{--        <div class="row">--}}
+{{--            <div class="col-md-4">--}}
+{{--                <select name="category_id" class="form-control">--}}
+{{--                    <option value="">-- Filter by Category --</option>--}}
+{{--                    @foreach($categories as $category)--}}
+{{--                        <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>--}}
+{{--                            {{ $category->name }}--}}
+{{--                        </option>--}}
+{{--                    @endforeach--}}
+{{--                </select>--}}
+{{--            </div>--}}
+{{--            <div class="col-md-2">--}}
+{{--                <button type="submit" class="btn btn-primary">Filter</button>--}}
+{{--            </div>--}}
+{{--        </div>--}}
+{{--    </form>--}}
 
     <a href="{{ route('expenses.create') }}" class="btn btn-primary mb-3">Add New Expense</a>
 

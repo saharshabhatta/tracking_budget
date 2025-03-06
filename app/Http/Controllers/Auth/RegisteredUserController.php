@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\User;
 use App\Models\UserCategory;
+use App\Models\UserIncome;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -44,13 +45,13 @@ class RegisteredUserController extends Controller
         return redirect()->route('register.categories');
     }
 
-    public function showCategories(): View
+    public function showCategories()
     {
         $categories = Category::all();
         return view('auth.register-categories', compact('categories'));
     }
 
-    public function storeCategories(Request $request): RedirectResponse
+    public function storeCategories(Request $request)
     {
         $request->validate([
             'categories' => ['required', 'array'],
@@ -71,16 +72,21 @@ class RegisteredUserController extends Controller
                 ['spending_percentage' => 0]
             );
         }
-
         return redirect()->route('register.incomes');
     }
 
-    public function showIncome(): View
+    public function showIncome()
     {
-        return view('auth.register-income');
+        $user = Auth::user();
+
+        $categories = UserCategory::where('user_id', $user->id)
+            ->with('category')
+            ->get();
+
+        return view('auth.register-income', compact('categories'));
     }
 
-    public function storeIncome(Request $request): RedirectResponse
+    public function storeIncome(Request $request)
     {
         $request->validate([
             'monthly_income' => ['required', 'numeric'],
@@ -91,10 +97,13 @@ class RegisteredUserController extends Controller
 
         $user = Auth::user();
 
-        $user->update([
-            'monthly_income' => $request->monthly_income,
-            'annual_income' => $request->annual_income,
-        ]);
+        $currentMonth = now()->month;
+        $currentYear = now()->year;
+
+        UserIncome::updateOrCreate(
+            ['user_id' => $user->id, 'month' => $currentMonth, 'year' => $currentYear],
+            ['monthly_income' => $request->monthly_income, 'annual_income' => $request->annual_income]
+        );
 
         foreach ($request->category_percentages as $categoryId => $percentage) {
             UserCategory::where('user_id', $user->id)
@@ -105,7 +114,7 @@ class RegisteredUserController extends Controller
         return redirect()->route('dashboard');
     }
 
-    public function finalizeRegistration(): RedirectResponse
+    public function finalizeRegistration()
     {
         return redirect(route('dashboard'));
     }

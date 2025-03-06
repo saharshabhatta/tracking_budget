@@ -7,7 +7,7 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-@include('layouts.navbar')
+{{--@include('layouts.navbar')--}}
 <div class="container mt-5">
     <h2 class="text-center mb-4">Select Categories</h2>
     <form action="{{ route('register.store-categories') }}" method="POST">

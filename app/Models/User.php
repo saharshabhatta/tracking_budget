@@ -23,8 +23,6 @@ class User extends Authenticatable
         'email',
         'phone',
         'password',
-        'monthly_income',
-        'annual_income',
     ];
 
     /**
@@ -53,6 +51,11 @@ class User extends Authenticatable
     public function categories()
     {
         return $this->belongsToMany(Category::class, 'user_categories')->withPivot('spending_percentage');
+    }
+
+    public function userIncomes()
+    {
+        return $this->hasMany(UserIncome::class);
     }
 
 }

@@ -7,7 +7,8 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-@include('layouts.navbar')
+{{--@include('layouts.navbar')--}}
+
 <div class="container mt-5">
     <h2 class="text-center mb-4">Income and Category Percentages</h2>
     <form action="{{ route('register.store-incomes') }}" method="POST">
@@ -22,23 +23,17 @@
         </div>
 
         <h3>Define Percentages for Categories:</h3>
-        @php
-            $user = Auth::user();
-            $categories = \App\Models\UserCategory::where('user_id', $user->id)->pluck('category_id')->toArray();
-        @endphp
 
-        @if(!empty($categories))
-            @foreach($categories as $index => $categoryId)
+        @if($categories->isNotEmpty())
+            @foreach($categories as $index => $userCategory)
                 <div class="form-group">
-                    <label for="category_percentage_{{ $index }}">{{ \App\Models\Category::find($categoryId)->name }}:</label>
-                    <input type="number" class="form-control" name="category_percentages[{{ $categoryId }}]" min="0" max="100" required>
+                    <label for="category_percentage_{{ $index }}">{{ $userCategory->category->name }}:</label>
+                    <input type="number" class="form-control" name="category_percentages[{{ $userCategory->category_id }}]" min="0" max="100" required>
                 </div>
             @endforeach
         @else
             <p class="text-danger">No categories available. Please select categories first.</p>
         @endif
-
-
 
         <button type="submit" class="btn btn-primary btn-block">Next</button>
     </form>

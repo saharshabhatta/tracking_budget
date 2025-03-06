@@ -22,6 +22,11 @@
             <input type="text" id="name" name="name" value="{{ $category->name }}" class="form-control" required>
         </div>
 
+{{--        <div class="mb-3">--}}
+{{--            <label for="spending_percentage" class="form-label">Spending Percentage</label>--}}
+{{--            <input type="number" id="spending_percentage" name="spending_percentage" value="{{$user_categories->spending_percentage}}" class="form-control" required>--}}
+{{--        </div>--}}
+
         <button type="submit" class="btn btn-success">Update Category</button>
     </form>
 </div>
