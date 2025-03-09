@@ -47,8 +47,8 @@ class DashboardController extends Controller
 
         $categories = Category::all();
 
-        $totalSpendPerCategory = Category::withSum(['expenses' => function ($query) use ($user) {
-            $query->where('user_id', $user->id);
+        $totalSpendPerCategory = Category::withSum(['expenses' => function ($query) use ($user, $selectedMonth) {
+            $query->where('user_id', $user->id)->whereMonth('created_at', $selectedMonth);
         }], 'amount')->get();
 
         $totalExpenses = $totalSpendPerCategory->sum('expenses_sum_amount');
@@ -66,14 +66,47 @@ class DashboardController extends Controller
             $actualAmounts[$category->id] = $actualAmount;
         }
 
+        $unselectedCategories = [];
+        foreach ($categories as $category) {
+            $userCategory = $user_categories->firstWhere('category_id', $category->id);
+            if (!$userCategory) {
+                $expenses = Expense::where('user_id', $user->id)
+                    ->where('category_id', $category->id)
+                    ->whereMonth('created_at', $selectedMonth)
+                    ->sum('amount');
+
+                if ($expenses > 0) {
+                    $actualLimit = ($expenses / $userIncome->monthly_income) * 100;
+
+                    $unselectedCategories[] = [
+                        'category_name' => $category->name,
+                        'amount' => 0,
+                        'limit' => 0,
+                        'actual_limit' => number_format($actualLimit, 2),
+                        'actual_amount' => $expenses,
+                    ];
+                } else {
+                    $unselectedCategories[] = [
+                        'category_name' => $category->name,
+                        'amount' => 0,
+                        'limit' => 0,
+                        'actual_limit' => 0,
+                        'actual_amount' => 0,
+                    ];
+                }
+            }
+        }
+
+
         $months = [
             'January', 'February', 'March', 'April', 'May', 'June',
             'July', 'August', 'September', 'October', 'November', 'December'
         ];
 
-        $currentMonth = $months[$selectedMonth - 1];
-
-        return view('dashboard', compact('user_categories', 'amount', 'totalSpendPerCategory', 'categories', 'remainingAmount', 'months', 'currentMonth', 'selectedMonth', 'userIncome', 'actualLimits', 'actualAmounts', 'limit_percentage'
+        return view('dashboard', compact(
+            'user_categories', 'amount', 'totalSpendPerCategory', 'categories',
+            'remainingAmount', 'months', 'selectedMonth', 'userIncome', 'actualLimits',
+            'actualAmounts', 'limit_percentage', 'unselectedCategories'
         ));
     }
 }

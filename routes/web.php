@@ -5,13 +5,14 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Middleware\checkForForecast;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('dashboard', [DashboardController::class, 'index'])->middleware('auth')->name('dashboard');
+Route::get('dashboard', [DashboardController::class, 'index'])->middleware('auth', 'forecast')->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -28,7 +29,7 @@ Route::post('register/incomes', [RegisteredUserController::class, 'storeIncome']
 Route::get('register/forecast', [RegisteredUserController::class, 'showForecast'])->name('register.forecast');
 Route::post('register/finalize', [RegisteredUserController::class, 'finalizeRegistration'])->name('register.finalize');
 
-Route::resource('categories', CategoryController::class);
-Route::resource('expenses', ExpenseController::class);
+Route::resource('categories', CategoryController::class)->middleware('forecast');
+Route::resource('expenses', ExpenseController::class)->middleware('forecast');
 
 require __DIR__.'/auth.php';

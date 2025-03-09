@@ -42,13 +42,21 @@
             </tr>
             </thead>
             <tbody>
-            @foreach($user_categories as $index => $user_category)
+            @foreach(array_merge($user_categories->toArray(), $unselectedCategories) as $category)
                 <tr>
-                    <td>{{ $user_category->category->name }}</td>
-                    <td class="text-end">Rs.{{ number_format($amount[$index], 2) }}</td>
-                    <td class="text-end">{{ number_format($limit_percentage[$index] ?? 0, 2) }}%</td>
-                    <td class="text-end">{{ number_format($actualLimits[$user_category->category->id] ?? 0, 2) }}%</td>
-                    <td class="text-end">Rs.{{ number_format($actualAmounts[$user_category->category->id] ?? 0, 2) }}</td>
+                    <td>{{ $category['category_name'] ?? $category['category']['name'] }}</td>
+                    <td class="text-end">
+                        Rs.{{ number_format($category['amount'] ?? $amount[$loop->index], 2) }}
+                    </td>
+                    <td class="text-end">
+                        {{ number_format($category['limit'] ?? $limit_percentage[$loop->index] ?? 0, 2) }}%
+                    </td>
+                    <td class="text-end">
+                        {{ number_format($category['actual_limit'] ?? $actualLimits[$category['category']['id'] ?? $category['category_id']] ?? 0, 2) }}%
+                    </td>
+                    <td class="text-end">
+                        Rs.{{ number_format($category['actual_amount'] ?? $actualAmounts[$category['category']['id'] ?? $category['category_id']] ?? 0, 2) }}
+                    </td>
                 </tr>
             @endforeach
             </tbody>

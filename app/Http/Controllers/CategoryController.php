@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\storeCategoryRequest;
 use App\Models\Category;
 use App\Models\UserCategory;
 use Illuminate\Http\Request;
@@ -14,7 +15,15 @@ class CategoryController extends Controller
     public function index()
     {
         $categories = Category::all();
+
+//        foreach ($categories as $category) {
+//            $comments = $category->comments;
+//            dd($comments->toArray());
+//        }
+
         return view('categories.index', compact('categories'));
+
+
     }
 
     /**
@@ -28,12 +37,8 @@ class CategoryController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(storeCategoryRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'spending_percentage'=>'required|numeric|min:0|max:100',
-        ]);
 
         $category = Category::create([
             'name' => $request->input('name'),
@@ -55,6 +60,11 @@ class CategoryController extends Controller
     public function show(string $id)
     {
         $category = Category::findOrFail($id);
+
+        if($category->user_id != auth()->id()){
+            abort(403);
+        }
+
         return view('categories.show', compact('category'));
     }
 

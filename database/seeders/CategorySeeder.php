@@ -9,11 +9,25 @@ class CategorySeeder extends Seeder
 {
     public function run()
     {
-        Category::create(['name' => 'Groceries']);
-        Category::create(['name' => 'Entertainment']);
-        Category::create(['name' => 'Bills']);
-        Category::create(['name' => 'Transport']);
-        Category::create(['name' => 'Savings']);
+        Category::create([
+            'name' => 'Groceries',
+            'user_id' => 1
+        ]);
+        Category::create([
+            'name' => 'Entertainment',
+            'user_id' => 1
+        ]);
+        Category::create([
+            'name' => 'Bills',
+            'user_id' => 1
+        ]);
+        Category::create([
+            'name' => 'Transport',
+            'user_id' => 1
+        ]);
+        Category::create([
+            'name' => 'Savings',
+            'user_id' => 1
+        ]);
     }
 }
-

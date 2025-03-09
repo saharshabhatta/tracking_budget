@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\storeExpenseRequest;
 use App\Models\Expense;
 use App\Models\Category;
 use Illuminate\Http\Request;
@@ -18,6 +19,11 @@ class ExpenseController extends Controller
         $expenses = $query->get();
         $categories = Category::all();
 
+//        foreach ($expenses as $expense) {
+//            $comments = $expense->comments;
+//            dd($comments->toArray());
+//        }
+
         return view('expenses.index', compact('expenses', 'categories'));
     }
 
@@ -33,14 +39,9 @@ class ExpenseController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(storeExpenseRequest $request)
     {
-        $validated = $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'amount' => 'required|numeric',
-            'description' => 'nullable|string',
-            'date' => 'required|date',
-        ]);
+        $validated = $request->validated();
 
         $validated['user_id'] = auth()->id();
 
@@ -65,6 +66,11 @@ class ExpenseController extends Controller
     public function edit($id)
     {
         $expense = Expense::findOrFail($id);
+
+        if($expense->user_id != auth()->id()){
+            abort(401);
+        }
+
         $categories = Category::all();
         return view('expenses.edit', compact('expense', 'categories'));
     }
@@ -72,14 +78,9 @@ class ExpenseController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(storeExpenseRequest $request, $id)
     {
-        $validated = $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'amount' => 'required|numeric',
-            'description' => 'nullable|string',
-            'date' => 'required|date',
-        ]);
+        $validated = $request->validated();
 
         $validated['user_id'] = auth()->id();
 

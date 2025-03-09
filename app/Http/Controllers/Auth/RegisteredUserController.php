@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\storeCategoryNameRequest;
+use App\Http\Requests\storeIncomeRequest;
 use App\Models\Category;
 use App\Models\User;
 use App\Models\UserCategory;
@@ -51,14 +53,8 @@ class RegisteredUserController extends Controller
         return view('auth.register-categories', compact('categories'));
     }
 
-    public function storeCategories(Request $request)
+    public function storeCategories(storeCategoryNameRequest $request)
     {
-        $request->validate([
-            'categories' => ['required', 'array'],
-            'categories.*' => ['exists:categories,id'],
-            'new_category' => ['nullable', 'string', 'max:255'],
-        ]);
-
         $user = Auth::user();
 
         if ($request->new_category) {
@@ -86,15 +82,8 @@ class RegisteredUserController extends Controller
         return view('auth.register-income', compact('categories'));
     }
 
-    public function storeIncome(Request $request)
+    public function storeIncome(storeIncomeRequest $request)
     {
-        $request->validate([
-            'monthly_income' => ['required', 'numeric'],
-            'annual_income' => ['required', 'numeric'],
-            'category_percentages' => ['required', 'array'],
-            'category_percentages.*' => ['numeric', 'between:0,100'],
-        ]);
-
         $user = Auth::user();
 
         $currentMonth = now()->month;

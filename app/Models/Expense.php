@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Expense extends Model
 {
@@ -24,4 +25,5 @@ class Expense extends Model
     {
         return $this->belongsTo(Category::class);
     }
+
 }
