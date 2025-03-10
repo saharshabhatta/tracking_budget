@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
+use App\Traits\HasStatements;
 
 class Expense extends Model
 {
+    use HasStatements;
+
     protected $table = 'expenses';
     protected $fillable = [
         'user_id',
@@ -25,5 +27,4 @@ class Expense extends Model
     {
         return $this->belongsTo(Category::class);
     }
-
 }
