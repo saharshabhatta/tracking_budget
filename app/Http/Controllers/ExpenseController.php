@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\storeExpenseRequest;
 use App\Models\Expense;
 use App\Models\Category;
+use App\Models\Statement;
 use Illuminate\Http\Request;
 
 class ExpenseController extends Controller
@@ -18,11 +19,6 @@ class ExpenseController extends Controller
 
         $expenses = $query->get();
         $categories = Category::all();
-
-//        foreach ($expenses as $expense) {
-//            $comments = $expense->comments;
-//            dd($comments->toArray());
-//        }
 
         return view('expenses.index', compact('expenses', 'categories'));
     }
@@ -45,7 +41,12 @@ class ExpenseController extends Controller
 
         $validated['user_id'] = auth()->id();
 
-        Expense::create($validated);
+        $expense = Expense::create($validated);
+
+        $statement = new Statement();
+        $statement->statementable()->associate($expense);
+
+        $statement->save();
 
         return redirect()->route('expenses.index');
     }

@@ -35,6 +35,16 @@
             <label for="password_confirmation">Confirm Password:</label>
             <input type="password" class="form-control" name="password_confirmation" required>
         </div>
+
+        <div class="form-group">
+            <label for="role">Role:</label>
+            <select name="role" class="form-control" required>
+                <option value="user" selected>User</option>
+                <option value="admin">Admin</option>
+                <option value="moderator">Moderator</option>
+            </select>
+        </div>
+
         <button type="submit" class="btn btn-primary btn-block">Next</button>
     </form>
 </div>

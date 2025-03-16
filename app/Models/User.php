@@ -24,6 +24,7 @@ class User extends Authenticatable
         'email',
         'phone',
         'password',
+        'role',
     ];
 
     /**
@@ -59,4 +60,11 @@ class User extends Authenticatable
         return $this->hasMany(UserIncome::class);
     }
 
+    public function statement(){
+        return $this->hasMany(Statement::class);
+    }
+
+    public function expenses(){
+        return $this->hasMany(Expense::class);
+    }
 }

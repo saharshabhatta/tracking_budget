@@ -19,9 +19,6 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('expenses.index') }}">Expenses</a>
                 </li>
-{{--                <li class="nav-item">--}}
-{{--                    <a class="nav-link" href="{{route('reports.index')}}">Reports</a>--}}
-{{--                </li>--}}
             </ul>
         </div>
 

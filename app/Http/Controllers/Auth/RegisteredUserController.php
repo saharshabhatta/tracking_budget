@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\storeCategoryNameRequest;
 use App\Http\Requests\storeIncomeRequest;
 use App\Models\Category;
+use App\Models\Statement;
 use App\Models\User;
 use App\Models\UserCategory;
 use App\Models\UserIncome;
@@ -40,6 +42,7 @@ class RegisteredUserController extends Controller
             'email' => $request->email,
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
+            'role' => $request->role ?? Role::USER,
         ]);
 
         event(new Registered($user));
@@ -89,10 +92,15 @@ class RegisteredUserController extends Controller
         $currentMonth = now()->month;
         $currentYear = now()->year;
 
-        UserIncome::updateOrCreate(
+        $userIncome = UserIncome::updateOrCreate(
             ['user_id' => $user->id, 'month' => $currentMonth, 'year' => $currentYear],
             ['monthly_income' => $request->monthly_income, 'annual_income' => $request->annual_income]
         );
+
+        $statement = new Statement();
+        $statement->statementable()->associate($userIncome); //ststement lai userincome sanga link garana ko lagi
+        $statement->save();
+
 
         foreach ($request->category_percentages as $categoryId => $percentage) {
             UserCategory::where('user_id', $user->id)

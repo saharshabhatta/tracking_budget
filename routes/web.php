@@ -1,11 +1,14 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\checkForForecast;
+use App\Http\Middleware\UserMiddleware;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -13,6 +16,7 @@ Route::get('/', function () {
 });
 
 Route::get('dashboard', [DashboardController::class, 'index'])->middleware('auth', 'forecast')->name('dashboard');
+Route::get('/dashboard/form-for-new-month/{month}', [DashboardController::class, 'showFormForNewMonth'])->name('dashboard.formForNewMonth')->middleware([UserMiddleware::class]);
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -32,4 +36,18 @@ Route::post('register/finalize', [RegisteredUserController::class, 'finalizeRegi
 Route::resource('categories', CategoryController::class)->middleware('forecast');
 Route::resource('expenses', ExpenseController::class)->middleware('forecast');
 
+
+Route::middleware([AdminMiddleware::class])->group(function () {
+    Route::get('admin/users', [AdminController::class, 'showUsers'])->name('admin.users');
+
+    Route::get('/admin/user/{userId}/categories', [AdminController::class, 'showUserCategories']);
+
+    Route::get('admin/categories', [AdminController::class, 'displayCategories'])->name('admin.categories');
+
+    Route::post('admin/categories/create', [AdminController::class, 'showCreateCategory'])->name('admin.createCategory');
+
+    Route::post('admin/categories/show', [AdminController::class, 'createCategory'])->name('admin.storeCategory');
+
+    Route::get('admin/dashboard', [AdminController::class, 'showDashboard'])->name('admin.dashboard');
+});
 require __DIR__.'/auth.php';

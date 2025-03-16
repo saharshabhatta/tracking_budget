@@ -28,8 +28,6 @@ class checkForForecast
         $selectedMonth = $request->query('month', Carbon::now()->month);
 
         $userIncome = $user->userIncomes()
-            ->where('month', $selectedMonth)
-            ->where('year', Carbon::now()->year)
             ->first();
 
         if (!$userIncome) {

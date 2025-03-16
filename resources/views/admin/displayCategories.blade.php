@@ -10,12 +10,12 @@
 </head>
 
 <body class="bg-light">
-@include('layouts.navbar')
+@include('layouts.adminNavbar')
 <div class="container mt-4">
     <h1 class="text-center mb-4">All Categories</h1>
 
     <div class="mb-3 text-end">
-        <a href="{{ route('categories.create') }}" class="btn btn-primary">Create New Category</a>
+        <a href="{{ route('admin.createCategory') }}" class="btn btn-primary">Create New Category</a>
     </div>
 
     <div class="table-responsive">
@@ -23,27 +23,23 @@
             <thead class="table-dark">
             <tr>
                 <th>Name</th>
-                <th>Action</th>
+                <th>Number of Users</th>
+                <th>Created By</th>
             </tr>
             </thead>
             <tbody>
             @foreach($categories as $category)
                 <tr>
                     <td>{{ $category->name }}</td>
+                    <td>{{ $category->users_count }}</td>
                     <td>
-                        <form action="{{ route('categories.destroy', $category->id) }}" method="POST">
-                            @csrf
-                            @method('DELETE')
-
-
-                            <button type="submit">Delete</button>
-
-                        </form>
+                        {{$category->user->first_name}}
                     </td>
                 </tr>
             @endforeach
             </tbody>
         </table>
+
     </div>
 </div>
 </body>

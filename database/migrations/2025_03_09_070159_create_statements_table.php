@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('statements', function (Blueprint $table) {
             $table->id();
+            $table->morphs('statementable');
             $table->timestamps();
         });
     }

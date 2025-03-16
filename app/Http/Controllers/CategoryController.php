@@ -102,5 +102,6 @@ class CategoryController extends Controller
     public function destroy(string $id)
     {
         $category=Category::destroy($id);
+        return redirect('/categories')->with('success', 'Category deleted successfully!');
     }
 }
