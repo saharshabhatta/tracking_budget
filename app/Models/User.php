@@ -52,7 +52,7 @@ class User extends Authenticatable
 
     public function categories()
     {
-        return $this->belongsToMany(Category::class, 'user_categories')->withPivot('spending_percentage');
+        return $this->belongsToMany(Category::class, 'user_categories')->withPivot('spending_percentage')->withTrashed();
     }
 
     public function userIncomes()

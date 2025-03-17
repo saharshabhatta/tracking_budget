@@ -16,7 +16,7 @@ Route::get('/', function () {
 });
 
 Route::get('dashboard', [DashboardController::class, 'index'])->middleware('auth', 'forecast')->name('dashboard');
-Route::get('/dashboard/form-for-new-month/{month}', [DashboardController::class, 'showFormForNewMonth'])->name('dashboard.formForNewMonth')->middleware([UserMiddleware::class]);
+Route::get('/dashboard/form-for-new-month/{month}', [DashboardController::class, 'showFormForNewMonth'])->name('dashboard.formForNewMonth');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -25,6 +25,7 @@
                 <th>Name</th>
                 <th>Number of Users</th>
                 <th>Created By</th>
+                <th>Action</th>
             </tr>
             </thead>
             <tbody>
@@ -35,6 +36,16 @@
                     <td>
                         {{$category->user->first_name}}
                     </td>
+                    <td>
+                        <form action="{{ route('categories.destroy', $category->id) }}" method="POST">
+                            @csrf
+                            @method('DELETE')
+
+                            <button type="submit">Delete</button>
+
+                        </form>
+                    </td>
+
                 </tr>
             @endforeach
             </tbody>

@@ -39,16 +39,30 @@ class CategoryController extends Controller
      */
     public function store(storeCategoryRequest $request)
     {
+        $category = Category::withTrashed()->where('name', $request->name)->first();
 
-        $category = Category::create([
-            'name' => $request->input('name'),
-        ]);
+        if($category){
+            $category->restore();
 
-        $user_category=UserCategory::create([
-            'user_id'=>auth()->id(),
-            'spending_percentage' => $request->input('spending_percentage'),
-            'category_id'=>$category->id,
-        ]);
+            $user_category=UserCategory::create([
+                'user_id'=>auth()->id(),
+                'spending_percentage' => $request->input('spending_percentage'),
+                'category_id'=>$category->id,
+            ]);
+        }
+
+        else{
+            $category = Category::create([
+                'user_id'=>auth()->id(),
+                'name' => $request->input('name'),
+            ]);
+
+            $user_category=UserCategory::create([
+                'user_id'=>auth()->id(),
+                'spending_percentage' => $request->input('spending_percentage'),
+                'category_id'=>$category->id,
+            ]);
+        }
 
         return redirect('/categories')->with('success', 'Category created successfully!');
     }

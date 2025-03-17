@@ -66,4 +66,10 @@ class AdminController extends Controller
 
         return view('admin.showUserCategories', compact('user'));
     }
+
+    public function destroyCategory(string $id)
+    {
+        $category=Category::destroy($id);
+        return redirect('admin.displayCategories')->with('success', 'Category deleted successfully!');
+    }
 }
