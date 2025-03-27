@@ -9,7 +9,7 @@
 <body>
 @include('layouts.navbar')
 <div class="container mt-5">
-    <h2 class="text-center mb-4">Income and Category Percentages for {{ \Carbon\Carbon::create()->month($selectedMonth)->format('F') }}</h2>
+    <h2 class="text-center mb-4">Income and Category Percentages </h2>
     <form action="{{ route('register.store-incomes') }}" method="POST">
         @csrf
         <div class="form-group">
@@ -27,10 +27,7 @@
                 <div class="form-group">
                     <label for="category_percentage_{{ $category->id }}">{{ $category->name }}:</label>
                     <input type="number" class="form-control" name="category_percentages[{{ $category->id }}]" min="0" max="100"
-                           value="{{ old('category_percentages.' . $category->id, $previousCategoryPercentages[$category->id] ?? '') }}" required>
-                    @if(isset($previousCategoryPercentages[$category->id]))
-                        <small class="form-text text-muted">Previous month actual limit: {{ number_format($previousCategoryPercentages[$category->id], 2) }}%</small>
-                    @endif
+                           value="{{ old('category_percentages.' . $category->id, isset($previousCategoryActualLimits[$category->id]) ? $previousCategoryActualLimits[$category->id] : '') }}" required>
                 </div>
             @endforeach
         @else

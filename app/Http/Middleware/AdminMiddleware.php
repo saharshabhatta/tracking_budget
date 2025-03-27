@@ -18,7 +18,8 @@ class AdminMiddleware
         if ($request->user() && $request->user()->role === 'admin') {
             return $next($request);
         }
-
-        return redirect('/');
+        else{
+            abort(401);
+        }
     }
 }

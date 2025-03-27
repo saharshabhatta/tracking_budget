@@ -27,7 +27,7 @@
     </div>
 
     <div class="text-center mb-4">
-        <h4>Monthly Income: {{ number_format($userIncome->monthly_income, 2) }}</h4>
+        <h4>Monthly Income: {{ number_format($Income->monthly_income, 2) }}</h4>
     </div>
 
     <div class="table-responsive">

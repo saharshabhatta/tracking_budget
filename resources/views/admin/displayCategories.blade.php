@@ -32,12 +32,12 @@
             @foreach($categories as $category)
                 <tr>
                     <td>{{ $category->name }}</td>
-                    <td>{{ $category->users_count }}</td>
+                    <td>{{ $category->user_count }}</td>
                     <td>
-                        {{$category->user->first_name}}
+                        {{ $category->user_name}}
                     </td>
                     <td>
-                        <form action="{{ route('categories.destroy', $category->id) }}" method="POST">
+                        <form action="{{ route('admin.category.destroy', $category->id) }}" method="POST">
                             @csrf
                             @method('DELETE')
 

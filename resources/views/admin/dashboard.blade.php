@@ -22,7 +22,7 @@
                 <p class="h5">{{ $totalUsers }}</p>
 
                 <h4>Average Salary</h4>
-                <p class="h5">{{ $average }}</p>
+                <p class="h5">{{ $averageIncome }}</p>
             </div>
         </div>
 

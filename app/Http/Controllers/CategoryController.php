@@ -15,15 +15,7 @@ class CategoryController extends Controller
     public function index()
     {
         $categories = Category::all();
-
-//        foreach ($categories as $category) {
-//            $comments = $category->comments;
-//            dd($comments->toArray());
-//        }
-
         return view('categories.index', compact('categories'));
-
-
     }
 
     /**
@@ -41,32 +33,23 @@ class CategoryController extends Controller
     {
         $category = Category::withTrashed()->where('name', $request->name)->first();
 
-        if($category){
+        if ($category) {
             $category->restore();
-
-            $user_category=UserCategory::create([
-                'user_id'=>auth()->id(),
-                'spending_percentage' => $request->input('spending_percentage'),
-                'category_id'=>$category->id,
-            ]);
-        }
-
-        else{
+        } else {
             $category = Category::create([
-                'user_id'=>auth()->id(),
+                'user_id' => auth()->id(),
                 'name' => $request->input('name'),
             ]);
-
-            $user_category=UserCategory::create([
-                'user_id'=>auth()->id(),
-                'spending_percentage' => $request->input('spending_percentage'),
-                'category_id'=>$category->id,
-            ]);
         }
+
+        UserCategory::create([
+            'user_id' => auth()->id(),
+            'spending_percentage' => $request->input('spending_percentage'),
+            'category_id' => $category->id,
+        ]);
 
         return redirect('/categories')->with('success', 'Category created successfully!');
     }
-
 
     /**
      * Display the specified resource.
@@ -75,7 +58,7 @@ class CategoryController extends Controller
     {
         $category = Category::findOrFail($id);
 
-        if($category->user_id != auth()->id()){
+        if ($category->user_id != auth()->id()) {
             abort(403);
         }
 
@@ -87,35 +70,29 @@ class CategoryController extends Controller
      */
     public function edit(string $id)
     {
-        $category = Category::findOrFail($id);
-        return view('categories.edit', compact('category'));
+//        $category = Category::findOrFail($id);
+//        return view('categories.edit', compact('category'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(storeCategoryRequest $request, string $id)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'spending_percentage'=>'required|numeric|min:0|max:100',
-        ]);
-
-        $category = Category::findOrFail($id);
-        $category->update([
-            'name' => $request->input('name'),
-        ]);
-
-        return redirect('/categories')->with('success', 'Category updated successfully!');
+//        $category = Category::findOrFail($id);
+//        $category->update([
+//            'name' => $request->input('name'),
+//        ]);
+//
+//        return redirect('/categories')->with('success', 'Category updated successfully!');
     }
-
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
-        $category=Category::destroy($id);
+        Category::destroy($id);
         return redirect('/categories')->with('success', 'Category deleted successfully!');
     }
 }

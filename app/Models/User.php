@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Auth;
 
 class User extends Authenticatable
 {
@@ -66,5 +67,30 @@ class User extends Authenticatable
 
     public function expenses(){
         return $this->hasMany(Expense::class);
+    }
+
+    public function roles() {
+        return $this->belongsToMany(Role::class);
+    }
+
+
+    public function permissions()
+    {
+        return $this->belongsToMany(Permission::class, 'permission_role');
+    }
+
+    public function getRole(){
+        return $this->roles()->first();
+
+    }
+    public function hasRole(string $roleName): bool {
+        return $this->roles()->where('name', $roleName)->exists();
+    }
+
+    public function hasPermission(string $permission, string $role): bool{
+        $permission = Permission::whereHas('roles', function ($query) use ($role) {
+            $query->where('id', $role);
+        })->where('name', $permission)->exists();
+        return $permission;
     }
 }

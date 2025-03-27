@@ -57,8 +57,7 @@ class ExpenseController extends Controller
      */
     public function show($id)
     {
-        $expense = Expense::with('category')->findOrFail($id);
-        return view('expenses.show', compact('expense'));
+
     }
 
     /**
