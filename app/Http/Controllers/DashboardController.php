@@ -66,11 +66,6 @@ class DashboardController extends Controller
     }
 
 
-//    public function hasCategories($user)
-//    {
-//        return UserCategory::where('user_id', $user->id)->exists();
-//    }
-
     public function getUserIncomeForMonth($user, $selectedMonth, $selectedYear)
     {
         $income = $user->userIncomes()

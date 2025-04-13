@@ -13,6 +13,17 @@
 @include('layouts.adminNavbar')
 
 <div class="container mt-5">
+
+    @if(session()->has('error'))
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
+    @elseif(session()->has('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
+
     <h2 class="text-center mb-4">Add Roles</h2>
 
     <form method="POST" action="{{ route('roles.store') }}">

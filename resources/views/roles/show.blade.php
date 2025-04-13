@@ -12,6 +12,7 @@
 @include('layouts.adminNavbar')
 
 <div class="container mt-5">
+
     <h1 class="mb-4">Users with the role: <span class="text-primary">{{ $role->name }}</span></h1>
 
     <form action="{{ route('roles.show', $role->id) }}" method="GET">

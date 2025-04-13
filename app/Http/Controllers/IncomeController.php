@@ -40,7 +40,6 @@ class IncomeController extends Controller
         return view('income.index', compact('income'));
     }
 
-
     /**
      * Show the form for creating a new resource.
      */
@@ -54,6 +53,11 @@ class IncomeController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'monthly_income' => 'required|numeric|min:0',
+            'annual_income' => 'required|numeric|min:0',
+        ]);
+
         $currentMonth = now()->month;
         $currentYear = now()->year;
 
@@ -71,7 +75,6 @@ class IncomeController extends Controller
             return redirect()->route('incomes.index');
         } catch (Exception $e) {
             DB::rollBack();
-//            dd($e->getMessage());
             return redirect()->route('incomes.index')->with('error', 'Something went wrong: ' . $e->getMessage());
         }
     }
@@ -99,6 +102,11 @@ class IncomeController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $request->validate([
+            'monthly_income' => 'required|numeric|min:0',
+            'annual_income' => 'required|numeric|min:0',
+        ]);
+
         DB::beginTransaction();
 
         try {
@@ -111,7 +119,7 @@ class IncomeController extends Controller
             DB::commit();
             return redirect()->route('incomes.index');
         }
-        catch (Exception $e){
+        catch (Exception){
             DB::rollBack();
             return redirect()->route('incomes.index')->with('error','Something went wrong');
         }

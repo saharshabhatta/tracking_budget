@@ -12,6 +12,17 @@
 <body class="bg-light">
 @include('layouts.adminNavbar')
 <div class="container mt-4">
+
+    @if(session()->has('error'))
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
+    @elseif(session()->has('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
+
     <h1 class="text-center mb-4">Edit Category</h1>
 
     <form method="POST" action="{{ route('admin.updateCategory', $category->id) }}">
