@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\checkForForecast;
 use App\Http\Middleware\CheckPermission;
 use Illuminate\Foundation\Application;
@@ -14,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
+            'admin'=>AdminMiddleware::class,
             'forecast' => checkForForecast::class,
             'permission' => CheckPermission::class,
         ]);

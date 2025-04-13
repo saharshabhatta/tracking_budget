@@ -11,23 +11,23 @@ class CategorySeeder extends Seeder
     {
         Category::create([
             'name' => 'Groceries',
-            'user_id' => 2
+            'user_id' => 1
         ]);
         Category::create([
             'name' => 'Entertainment',
-            'user_id' => 2
+            'user_id' => 1
         ]);
         Category::create([
             'name' => 'Bills',
-            'user_id' => 2
+            'user_id' => 1
         ]);
         Category::create([
             'name' => 'Transport',
-            'user_id' => 2
+            'user_id' => 1
         ]);
         Category::create([
             'name' => 'Savings',
-            'user_id' => 2
+            'user_id' => 1
         ]);
     }
 }

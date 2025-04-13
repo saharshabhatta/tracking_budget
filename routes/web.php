@@ -35,7 +35,6 @@ Route::middleware(['auth','permission:user'])->group(function () {
     Route::post('incomes.filter', [IncomeController::class, 'filter'])->name('incomes.filter');
 });
 
-
 Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
 Route::post('register/personal-info', [RegisteredUserController::class, 'storePersonalInfo'])->name('register.personal-info');
 Route::get('register/categories', [RegisteredUserController::class, 'showCategories'])->name('register.categories');

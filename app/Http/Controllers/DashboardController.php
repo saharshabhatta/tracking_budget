@@ -130,7 +130,6 @@ class DashboardController extends Controller
             });
             return [$forecastedCategories, true];
         }
-
         return [$categories, false];
     }
 
@@ -208,10 +207,7 @@ class DashboardController extends Controller
     public function getMonths()
     {
         return [
-            'January', 'February', 'March', 'April', 'May', 'June',
-            'July', 'August', 'September', 'October', 'November', 'December'
+            'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'
         ];
     }
-
-
 }
