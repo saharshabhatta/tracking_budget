@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\Role;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -28,12 +29,45 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        if (Auth::user()->role === 'admin') {
+        $user = Auth::user();
+
+        if ($user->roles->count() > 1) {
+            session(['available_roles' => $user->roles]);
+            return redirect()->route('select.role');
+        }
+
+        $role = $user->roles->first();
+        session(['active_role' => $role->name]);
+
+        if ($role->name === 'admin') {
             return redirect()->route('admin.dashboard');
         }
 
         return redirect()->intended(route('dashboard', absolute: false));
     }
+
+
+    public function selectRole()
+    {
+        $roles = session('available_roles');
+
+        return view('auth.select-role', compact('roles'));
+    }
+
+    public function chooseRole(Request $request)
+    {
+        $roleId = $request->input('role_id');
+        $role = Role::findOrFail($roleId);
+
+        session(['active_role' => $role->name]);
+
+        if ($role->name === 'admin') {
+            return redirect()->route('admin.dashboard');
+        }
+
+        return redirect()->intended(route('dashboard', absolute: false));
+    }
+
 
 
     /**

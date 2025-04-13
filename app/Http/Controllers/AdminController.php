@@ -4,18 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\storeCategoryNameRequest;
 use App\Models\Category;
+use App\Models\Role;
 use App\Models\User;
 use App\Models\UserIncome;
+use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
-    /**
-     * Show the dashboard with various statistics.
-     */
-    public function showDashboard()
-    {
+    public function showDashboard(){
         $averageIncome = UserIncome::avg('monthly_income');
         $totalUsers = User::count();
 
@@ -36,66 +36,159 @@ class AdminController extends Controller
         return view('admin.dashboard', compact('averageIncome', 'totalUsers', 'categoriesSpending', 'categoriesWithMostUsers'));
     }
 
-    /**
-     * Show all users.
-     */
     public function showUsers()
     {
-        $users = User::all();
+        $users = User::paginate(10);
         $totalUsers = User::count();
         return view('admin.users', compact('users', 'totalUsers'));
     }
 
-    /**
-     * Display the list of categories and their user count.
-     */
-    public function displayCategories()
+    public function search(Request $request)
     {
-        $categories = DB::table('categories')
-            ->select('categories.id', 'categories.name', 'categories.user_id', 'users.first_name as user_name', DB::raw('COUNT(DISTINCT user_categories.user_id) as user_count'))
-            ->leftJoin('user_categories', 'categories.id', '=', 'user_categories.category_id')
-            ->leftJoin('users', 'categories.user_id', '=', 'users.id')
-            ->groupBy('categories.id', 'categories.name', 'categories.user_id', 'users.first_name')
-            ->get();
+        $query = User::query();
+        $totalUsers = User::count();
 
-        return view('admin.displayCategories', compact('categories'));
+        if ($request->has('search') && $request->search != '') {
+            $query->where(function ($subQuery) use ($request) {
+                $subQuery->where('first_name', 'like', '%' . $request->search . '%')
+                    ->orWhere('last_name', 'like', '%' . $request->search . '%')
+                    ->orWhere('email', 'like', '%' . $request->search . '%')
+                    ->orWhere('phone', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        $users = $query->paginate(10)->appends($request->all());
+        return view('admin.users', compact('users', 'totalUsers'));
     }
 
-    /**
-     * Show the form for creating a new category.
-     */
-    public function showCreateCategory()
-    {
+
+    public function displayCategories(Request $request) {
+        $searchTerm = $request->input('search', '');
+
+        $categories = DB::table('categories')
+            ->select(
+                'categories.id',
+                'categories.name',
+                'categories.user_id',
+                'categories.created_at',
+                'users.first_name as user_name',
+                DB::raw('COUNT(DISTINCT user_categories.user_id) as user_count')
+            )
+            ->leftJoin('user_categories', 'categories.id', '=', 'user_categories.category_id')
+            ->leftJoin('users', 'categories.user_id', '=', 'users.id')
+            ->whereNull('categories.deleted_at')
+            ->groupBy('categories.id', 'categories.name', 'categories.user_id', 'categories.created_at', 'users.first_name');
+
+        if ($searchTerm) {
+            $categories->where('categories.name', 'like', '%' . $searchTerm . '%')
+                ->orWhere('users.first_name', 'like', '%' . $searchTerm . '%');
+        }
+
+        if ($request->has('from') && $request->has('to') && $request->from && $request->to) {
+            $categories->whereBetween('created_at', [$request->from, $request->to]);
+        }
+
+        $categories = $categories->paginate(5)->withQueryString();
+
+        return view('admin.displayCategories', compact('categories', 'searchTerm'));
+    }
+
+
+    public function showCreateCategory(){
         return view('admin.createCategory');
     }
 
-    /**
-     * Create a new category.
-     */
-    public function createCategory(storeCategoryNameRequest $request)
+    public function createCategory(StoreCategoryNameRequest $request)
     {
-        Category::create([
-            'name' => $request->input('name'),
+        DB::beginTransaction();
+
+        try {
+            $category = Category::create([
+                'name' => $request->input('name'),
+            ]);
+
+            DB::commit();
+
+            if ($category && $category->trashed()) {
+                $category->restore();
+            }
+
+            return redirect('/admin/categories');
+        } catch (Exception $e) {
+            DB::rollBack();
+//            dd($e->getMessage());
+            return back()->withErrors(['error' => 'Category creation failed, please try again.']);
+        }
+    }
+
+    public function showUserCategories(Request $request, $userId)
+    {
+        $searchTerm = $request->get('search', '');
+        $selectedMonth = $request->get('month', now()->format('Y-m'));
+
+        $user = User::findOrFail($userId);
+
+        $categories = DB::table('user_categories')
+            ->join('categories', 'user_categories.category_id', '=', 'categories.id')
+            ->where('user_categories.user_id', $userId)
+            ->when($searchTerm, function ($query) use ($searchTerm) {
+                return $query->where('categories.name', 'like', '%' . $searchTerm . '%');
+            })
+            ->whereMonth('user_categories.create_date', Carbon::parse($selectedMonth)->month)
+            ->whereYear('user_categories.create_date', Carbon::parse($selectedMonth)->year)
+            ->orderBy('user_categories.create_date', 'desc')
+            ->select('categories.*', 'user_categories.spending_percentage', 'user_categories.create_date')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('admin.showUserCategories', compact('categories', 'selectedMonth', 'searchTerm', 'user'));
+    }
+
+
+    public function editCategory($id) {
+        $category = Category::findOrFail($id);
+
+        $userCount = $category->users()->count();
+
+        return view('admin.editCategory', compact('category', 'userCount'));
+    }
+
+    public function updateCategory(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
         ]);
 
-        return redirect('/admin/categories')->with('success', 'Category added successfully!');
+        DB::beginTransaction();
+
+        try {
+            $category = Category::findOrFail($id);
+
+            if ($category->trashed()) {
+                $category->restore();
+            }
+
+            $category->name = $validated['name'];
+            $category->save();
+
+            DB::commit();
+
+            return redirect()->route('admin.categories')->with('success', 'Category updated successfully.');
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            return redirect()->route('admin.categories')->with('error', 'Something went wrong while updating the category.');
+        }
     }
 
-    /**
-     * Show the categories of a specific user.
-     */
-    public function showUserCategories($userId)
-    {
-        $user = User::with('categories')->findOrFail($userId);
-        return view('admin.showUserCategories', compact('user'));
+    public function destroyCategory(string $id) {
+        try {
+            $category = Category::findOrFail($id);
+            $category->delete();
+            return redirect()->route('admin.categories')->with('success', 'Category deleted successfully.');
+        } catch (Exception $e) {
+            return redirect()->route('admin.categories')->with('error', 'Something went wrong while deleting the category.');
+        }
     }
 
-    /**
-     * Delete a category.
-     */
-    public function destroyCategory(string $id)
-    {
-        Category::destroy($id);
-        return redirect()->route('admin.categories')->with('success', 'Category deleted successfully!');
-    }
 }

@@ -19,6 +19,12 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('expenses.index') }}">Expenses</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('incomes.index') }}">Income</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('transactions.index') }}">Transactions</a>
+                </li>
             </ul>
         </div>
 

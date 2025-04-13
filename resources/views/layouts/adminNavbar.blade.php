@@ -20,6 +20,12 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('admin.users') }}">User</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('roles.index') }}">Roles</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('admin.assign-permissions') }}">Permission</a>
+                </li>
             </ul>
             <form action="{{ route('logout') }}" method="POST" class="d-inline">
                 @csrf

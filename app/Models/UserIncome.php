@@ -8,7 +8,7 @@ use App\Traits\HasStatements;
 
 class UserIncome extends Model
 {
-    use HasFactory, HasStatements;
+    use HasStatements;
 
     protected $fillable = ['user_id', 'monthly_income', 'annual_income', 'month', 'year'];
 

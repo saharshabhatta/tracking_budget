@@ -15,25 +15,39 @@
         <div class="mb-3">
             <label for="category_id" class="form-label">Category</label>
             <select name="category_id" id="category_id" class="form-control">
-                @foreach($categories as $category)
-                    <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
+                @foreach($userCategories as $category)
+                    <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                        {{ $category->name }}
+                    </option>
                 @endforeach
             </select>
+            @error('category_id')
+            <div class="text-danger">{{ $message }}</div>
+            @enderror
         </div>
 
         <div class="mb-3">
             <label for="amount" class="form-label">Amount</label>
             <input type="number" name="amount" id="amount" class="form-control" value="{{ old('amount') }}" step="0.01" required>
+            @error('amount')
+            <div class="text-danger">{{ $message }}</div>
+            @enderror
         </div>
 
         <div class="mb-3">
             <label for="description" class="form-label">Description</label>
             <textarea name="description" id="description" class="form-control">{{ old('description') }}</textarea>
+            @error('description')
+            <div class="text-danger">{{ $message }}</div>
+            @enderror
         </div>
 
         <div class="mb-3">
             <label for="date" class="form-label">Date</label>
             <input type="date" name="date" id="date" class="form-control" value="{{ old('date') }}" required>
+            @error('date')
+            <div class="text-danger">{{ $message }}</div>
+            @enderror
         </div>
 
         <button type="submit" class="btn btn-success">Save Expense</button>

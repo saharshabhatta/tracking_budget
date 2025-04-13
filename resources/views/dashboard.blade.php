@@ -12,22 +12,21 @@
 <div class="container mt-5">
     <h3 class="text-center mb-4">Forecast</h3>
 
-    <div class="text-center mb-3">
-        <h5>Months of the Year</h5>
-        <ul class="list-inline">
-            @foreach($months as $key => $month)
-                <li class="list-inline-item px-2">
-                    <a href="{{ route('dashboard', ['month' => $key + 1]) }}" class="text-decoration-none
-                        {{ $key + 1 == $selectedMonth ? 'fw-bold text-primary' : '' }}">
-                        {{ $month }}
-                    </a>
-                </li>
-            @endforeach
-        </ul>
+    <div class="row mb-4">
+        <form method="GET" class="col-md-6 offset-md-3">
+            <div class="row">
+                <div class="col-md-8">
+                    <input type="month" name="month" class="form-control" value="{{ sprintf('%04d-%02d', $selectedYear, $selectedMonth) }}">
+                </div>
+                <div class="col-md-4 d-grid">
+                    <button class="btn btn-primary" type="submit">Filter</button>
+                </div>
+            </div>
+        </form>
     </div>
 
     <div class="text-center mb-4">
-        <h4>Monthly Income: {{ number_format($Income->monthly_income, 2) }}</h4>
+        <h4>Monthly Income: Rs.{{ number_format($userIncome, 2) }}</h4>
     </div>
 
     <div class="table-responsive">
@@ -42,32 +41,38 @@
             </tr>
             </thead>
             <tbody>
-            @foreach(array_merge($user_categories->toArray(), $unselectedCategories) as $category)
+            @if(count($user_categories) > 0)
+                @foreach($user_categories as $index => $category)
+                    <tr>
+                        <td>{{ $category['category']['name'] }}</td>
+                        <td class="text-end">
+                            Rs.{{ number_format($amount[$index] ?? 0, 2) }}
+                        </td>
+                        <td class="text-end">
+                            {{ number_format($limit_percentage[$index] ?? 0, 2) }}%
+                        </td>
+                        <td class="text-end">
+                            {{ number_format($actualLimits[$category['category']['id']] ?? 0, 2) }}%
+                        </td>
+                        <td class="text-end">
+                            Rs.{{ number_format($actualAmounts[$category['category']['id']] ?? 0, 2) }}
+                        </td>
+                    </tr>
+                @endforeach
+            @else
                 <tr>
-                    <td>{{ $category['category_name'] ?? $category['category']['name'] }}</td>
-                    <td class="text-end">
-                        Rs.{{ number_format($category['amount'] ?? $amount[$loop->index], 2) }}
-                    </td>
-                    <td class="text-end">
-                        {{ number_format($category['limit'] ?? $limit_percentage[$loop->index] ?? 0, 2) }}%
-                    </td>
-                    <td class="text-end">
-                        {{ number_format($category['actual_limit'] ?? $actualLimits[$category['category']['id'] ?? $category['category_id']] ?? 0, 2) }}%
-                    </td>
-                    <td class="text-end">
-                        Rs.{{ number_format($category['actual_amount'] ?? $actualAmounts[$category['category']['id'] ?? $category['category_id']] ?? 0, 2) }}
-                    </td>
+                    <td colspan="5" class="text-center text-muted">No forecast for this month.</td>
                 </tr>
-            @endforeach
+            @endif
             </tbody>
         </table>
     </div>
 
     <div class="mt-4 p-3 bg-white shadow-sm rounded text-center">
         <h5>Remaining Amount</h5>
-        <p class="fw-bold text-success">{{ number_format($remainingAmount, 2) }}</p>
+        <p class="fw-bold text-success">Rs.{{ number_format($remainingAmount, 2) }}</p>
     </div>
-
 </div>
+
 </body>
 </html>

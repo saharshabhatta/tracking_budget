@@ -20,7 +20,6 @@ return new class extends Migration
             $table->year('year');
             $table->timestamps();
 
-            $table->unique(['user_id', 'month', 'year']);
         });
     }
 

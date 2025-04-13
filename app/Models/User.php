@@ -56,6 +56,11 @@ class User extends Authenticatable
         return $this->belongsToMany(Category::class, 'user_categories')->withPivot('spending_percentage')->withTrashed();
     }
 
+    public function userCategories()
+    {
+        return $this->hasMany(UserCategory::class);
+    }
+
     public function userIncomes()
     {
         return $this->hasMany(UserIncome::class);
@@ -73,6 +78,9 @@ class User extends Authenticatable
         return $this->belongsToMany(Role::class);
     }
 
+    protected $casts = [
+        'role'=>Role::class,
+    ];
 
     public function permissions()
     {

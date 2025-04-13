@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\FutureDateRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class storeExpenseRequest extends FormRequest
@@ -23,9 +24,9 @@ class storeExpenseRequest extends FormRequest
     {
         return [
             'category_id' => 'required|exists:categories,id',
-            'amount' => 'required|numeric',
+            'amount' => 'required|numeric|min:0',
             'description' => 'nullable|string',
-            'date' => 'required|date',
+            'date' => ['required', 'date', new FutureDateRule()],
         ];
     }
 }

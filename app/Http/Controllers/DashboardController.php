@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
-use App\Models\Expense;
 use App\Models\UserCategory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -15,118 +14,151 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        if (!$this->hasCategories($user)) {
+        $currentMonth = Carbon::now()->month;
+        $currentYear = Carbon::now()->year;
+
+        if (!$this->hasCategoriesForCurrentMonth($user, $currentMonth, $currentYear)) {
             return redirect()->route('register.categories');
         }
 
-        $selectedMonth = (int) $request->query('month', Carbon::now()->month);
+        $selectedMonthYear = $request->query('month');
+        $selectedMonth = $selectedMonthYear ? (int) substr($selectedMonthYear, 5, 2) : Carbon::now()->month;
+        $selectedYear = $selectedMonthYear ? (int) substr($selectedMonthYear, 0, 4) : Carbon::now()->year;
 
-        $userIncome = $this->getUserIncome($user);
-        if (!$userIncome) {
-            return redirect()->route('register.incomes');
-        }
+        $userIncome = $this->getUserIncomeForMonth($user, $selectedMonth, $selectedYear);
+        [$user_categories, $isForecast] = $this->getUserCategories($user, $selectedMonth, $selectedYear);
 
-        if (!$this->hasUserCategoryForMonth($user, $selectedMonth)) {
-            return redirect()->route('dashboard.formForNewMonth', ['month' => $selectedMonth]);
-        }
-
-        $user_categories = $this->getUserCategories($user, $selectedMonth);
-
-        $Income = $this->getUserIncomeForMonth($user, $selectedMonth);
-
-        $amount = $this->calculateAmounts($user_categories, $Income);
+        $amount = $this->calculateAmounts($user_categories, $userIncome);
         $limit_percentage = $this->getLimitPercentages($user_categories);
 
-        $totalSpendPerCategory = $this->getTotalSpendPerCategory($user, $selectedMonth);
+        if ($isForecast) {
+            $actualLimits = [];
+            $actualAmounts = [];
+            foreach ($user_categories as $cat) {
+                $categoryId = $cat->category->id ?? $cat->category_id;
+                $actualLimits[$categoryId] = 0;
+                $actualAmounts[$categoryId] = 0;
+            }
+            $totalSpendPerCategory = collect();
+        } else {
+            $totalSpendPerCategory = $this->getTotalSpendPerCategory($user, $selectedMonth, $selectedYear);
+            $actualLimits = $this->calculateActualLimits($totalSpendPerCategory, $userIncome);
+            $actualAmounts = $this->calculateActualAmounts($actualLimits, $userIncome);
+        }
 
-        $remainingAmount = $this->calculateRemainingAmount($Income, $totalSpendPerCategory);
-
-        $actualLimits = $this->calculateActualLimits($totalSpendPerCategory, $Income);
-        $actualAmounts = $this->calculateActualAmounts($actualLimits, $Income);
-
-        $unselectedCategories = $this->getUnselectedCategories($user, $user_categories, $selectedMonth, $Income);
-
+        $remainingAmount = $this->calculateRemainingAmount($userIncome, $totalSpendPerCategory);
         $months = $this->getMonths();
 
-        return view('dashboard', compact('user_categories', 'amount', 'totalSpendPerCategory','remainingAmount', 'months', 'selectedMonth', 'userIncome', 'actualLimits', 'actualAmounts', 'limit_percentage', 'unselectedCategories', 'Income'));
-    }
-
-    public function showFormForNewMonth($selectedMonth)
-    {
-        $user = Auth::user();
-
-        $selectedMonth = (int) $selectedMonth;
-
-        $previousMonth = $selectedMonth - 1;
-        if ($previousMonth < 1) {
-            $previousMonth = 12;
-        }
-
-        $previousUserIncome = $user->userIncomes()
-            ->where('month', $previousMonth)
-            ->where('year', Carbon::now()->year)
-            ->first();
-
-        $previousCategoryLimits = Category::withSum(['expenses' => function ($query) use ($user, $previousMonth) {
-            $query->where('user_id', $user->id)->whereMonth('created_at', $previousMonth);
-        }], 'amount')->get();
-
-        $previousCategoryActualLimits = [];
-
-        foreach ($previousCategoryLimits as $category) {
-            $categoryTotalExpenses = $category->expenses_sum_amount ?? 0;
-            $actualLimit = ($previousUserIncome && $previousUserIncome->monthly_income > 0)
-                ? ($categoryTotalExpenses / $previousUserIncome->monthly_income) * 100
-                : 0;
-
-            $previousCategoryActualLimits[$category->id] = number_format($actualLimit, 2);
-        }
-
-        $categories = Category::all();
-
-        return view('form_for_new_month', compact(
-            'previousUserIncome', 'previousCategoryActualLimits', 'selectedMonth', 'categories'
+        return view('dashboard', compact(
+            'user_categories',
+            'amount',
+            'totalSpendPerCategory',
+            'remainingAmount',
+            'months',
+            'selectedMonth',
+            'userIncome',
+            'actualLimits',
+            'actualAmounts',
+            'limit_percentage',
+            'isForecast',
+            'selectedYear'
         ));
     }
 
-    public function hasCategories($user)
+
+//    public function hasCategories($user)
+//    {
+//        return UserCategory::where('user_id', $user->id)->exists();
+//    }
+
+    public function getUserIncomeForMonth($user, $selectedMonth, $selectedYear)
     {
-        return UserCategory::where('user_id', $user->id)->exists();
+        $income = $user->userIncomes()
+            ->where('month', $selectedMonth)
+            ->where('year', $selectedYear)
+            ->sum('monthly_income');
+
+        if (!$income) {
+            if ($selectedMonth == 1) {
+                $selectedMonth = 12;
+                $selectedYear -= 1;
+            } else {
+                $selectedMonth -= 1;
+            }
+
+            $income = $user->userIncomes()
+                ->where('month', $selectedMonth)
+                ->where('year', $selectedYear)
+                ->sum('monthly_income');
+        }
+
+        return $income;
     }
 
-    public function getUserIncome($user)
+    public function getUserCategories($user, $selectedMonth, $selectedYear)
     {
-        return $user->userIncomes()->first();
-    }
-
-    public function hasUserCategoryForMonth($user, $selectedMonth)
-    {
-        return UserCategory::where('user_id', $user->id)
-            ->whereMonth('create_date', $selectedMonth)
-            ->exists();
-    }
-
-    public function getUserCategories($user, $selectedMonth)
-    {
-        return UserCategory::with('category')
+        $categories = UserCategory::with('category')
             ->where('user_id', $user->id)
             ->whereMonth('create_date', $selectedMonth)
+            ->whereYear('create_date', $selectedYear)
+            ->get();
+
+        if ($categories->isEmpty()) {
+            $previousMonth = $selectedMonth == 1 ? 12 : $selectedMonth - 1;
+            $previousYear = $selectedMonth == 1 ? $selectedYear - 1 : $selectedYear;
+
+            $previousCategories = UserCategory::with('category')
+                ->where('user_id', $user->id)
+                ->whereMonth('create_date', $previousMonth)
+                ->whereYear('create_date', $previousYear)
+                ->get();
+
+            $previousExpenses = $this->getTotalSpendPerCategory($user, $previousMonth, $previousYear);
+            $previousIncome = $this->getUserIncomeForMonth($user, $previousMonth, $previousYear);
+            $actualLimits = $this->calculateActualLimits($previousExpenses, $previousIncome);
+
+            $forecastedCategories = $previousCategories->map(function ($cat) use ($actualLimits, $previousIncome) {
+                $previousLimitPercentage = $cat->spending_percentage;
+                $previousLimitAmount = ($previousIncome * $previousLimitPercentage) / 100;
+
+                $actualSpentAmount = $actualLimits[$cat->category_id] ?? 0;
+                $actualSpentAmount = ($actualSpentAmount * $previousIncome) / 100;
+
+                $averageAmount = ($previousLimitAmount + $actualSpentAmount) / 2;
+
+                $newPercentage = $previousIncome > 0 ? ($averageAmount / $previousIncome) * 100 : 0;
+
+                $newCat = clone $cat;
+                $newCat->spending_percentage = $newPercentage;
+
+                return $newCat;
+            });
+            return [$forecastedCategories, true];
+        }
+
+        return [$categories, false];
+    }
+
+    public function getTotalSpendPerCategory($user, $selectedMonth, $selectedYear)
+    {
+        return Category::withSum(['expenses' => function ($query) use ($user, $selectedMonth, $selectedYear) {
+            $query->where('user_id', $user->id)
+                ->whereMonth('created_at', $selectedMonth)
+                ->whereYear('created_at', $selectedYear);
+        }], 'amount')
+            ->whereHas('users', function ($query) use ($user, $selectedMonth, $selectedYear) {
+                $query->where('user_id', $user->id)
+                    ->whereMonth('create_date', $selectedMonth)
+                    ->whereYear('create_date', $selectedYear);
+            })
             ->get();
     }
 
-    public function getUserIncomeForMonth($user, $selectedMonth)
-    {
-        return $user->userIncomes()
-            ->where('month', $selectedMonth)
-            ->where('year', now()->year)
-            ->first();
-    }
-
-    public function calculateAmounts($user_categories, $Income)
+    public function calculateAmounts($user_categories, $income)
     {
         $amount = [];
         foreach ($user_categories as $category) {
-            $calculated_amount = $Income->monthly_income * $category->spending_percentage / 100;
+            $calculated_amount = $income * $category->spending_percentage / 100;
             $amount[] = $calculated_amount;
         }
         return $amount;
@@ -141,84 +173,50 @@ class DashboardController extends Controller
         return $limit_percentage;
     }
 
-    public function getTotalSpendPerCategory($user, $selectedMonth)
-    {
-        return Category::withSum(['expenses' => function ($query) use ($user, $selectedMonth) {
-            $query->where('user_id', $user->id)->whereMonth('created_at', $selectedMonth);
-        }], 'amount')->get();
-    }
-
-    public function calculateRemainingAmount($Income, $totalSpendPerCategory)
+    public function calculateRemainingAmount($income, $totalSpendPerCategory)
     {
         $totalExpenses = $totalSpendPerCategory->sum('expenses_sum_amount');
-        return $Income->monthly_income - $totalExpenses;
+        return $income - $totalExpenses;
     }
 
-    public function calculateActualLimits($totalSpendPerCategory, $Income)
+    public function calculateActualLimits($totalSpendPerCategory, $income)
     {
         $actualLimits = [];
         foreach ($totalSpendPerCategory as $category) {
-            $categoryTotalExpenses = $category->expenses_sum_amount;
-            $actualLimit = ($categoryTotalExpenses / $Income->monthly_income) * 100;
+            $categoryTotalExpenses = $category->expenses_sum_amount ?? 0;
+            $actualLimit = ($income > 0)
+                ? ($categoryTotalExpenses / $income) * 100
+                : 0;
             $actualLimits[$category->id] = $actualLimit;
         }
         return $actualLimits;
     }
 
-    public function calculateActualAmounts($actualLimits, $Income)
+    public function calculateActualAmounts($actualLimits, $income)
     {
         $actualAmounts = [];
         foreach ($actualLimits as $categoryId => $actualLimit) {
-            $actualAmount = ($Income->monthly_income * $actualLimit) / 100;
+            $actualAmount = ($income * $actualLimit) / 100;
             $actualAmounts[$categoryId] = $actualAmount;
         }
         return $actualAmounts;
     }
 
-    public function getUnselectedCategories($user, $user_categories, $selectedMonth, $Income)
+    public function hasCategoriesForCurrentMonth($user, $currentMonth, $currentYear)
     {
-        $unselectedCategories = [];
-        $categories = Category::all();
-        foreach ($categories as $category) {
-            $userCategory = $user_categories->firstWhere('category_id', $category->id);
-            if (!$userCategory) {
-                $expenses = Expense::where('user_id', $user->id)
-                    ->where('category_id', $category->id)
-                    ->whereMonth('created_at', $selectedMonth)
-                    ->sum('amount');
-
-                $unselectedCategories[] = $this->prepareUnselectedCategory($category, $expenses, $Income);
-            }
-        }
-        return $unselectedCategories;
-    }
-
-    public function prepareUnselectedCategory($category, $expenses, $Income)
-    {
-        if ($expenses > 0) {
-            $actualLimit = ($expenses / $Income->monthly_income) * 100;
-            return [
-                'category_name' => $category->name,
-                'amount' => 0,
-                'limit' => 0,
-                'actual_limit' => number_format($actualLimit, 2),
-                'actual_amount' => $expenses,
-            ];
-        } else {
-            return [
-                'category_name' => $category->name,
-                'amount' => 0,
-                'limit' => 0,
-                'actual_limit' => 0,
-                'actual_amount' => 0,
-            ];
-        }
+        return UserCategory::where('user_id', $user->id)
+            ->whereMonth('create_date', $currentMonth)
+            ->whereYear('create_date', $currentYear)
+            ->exists();
     }
 
     public function getMonths()
     {
         return [
-            'January', 'February', 'March', 'April', 'May', 'June','July', 'August', 'September', 'October', 'November', 'December'
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
         ];
     }
+
+
 }

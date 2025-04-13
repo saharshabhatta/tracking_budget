@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class storeCategoryRequest extends FormRequest
 {
@@ -22,8 +23,16 @@ class storeCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
-            'spending_percentage'=>'required|numeric|min:0|max:100',
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('categories', 'name')->where(function ($query) {
+                    return $query->where('user_id', auth()->id());
+                }),
+            ],
+            'spending_percentage' => 'nullable|numeric|min:0|max:100',
         ];
     }
+
 }

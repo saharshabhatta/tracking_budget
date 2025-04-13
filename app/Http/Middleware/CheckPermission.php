@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Enums\Role;
+use App\Enums\Roles;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -28,19 +28,16 @@ class CheckPermission
         $role = $user->getRole();
 
         if (!$role) {
-            abort(403, 'Role not assigned');
+            abort(403, 'Roles not assigned');
         }
 
-        if ($role->name == Role::ADMIN->value) {
-            return $next($request);
-        }
-
-        $hasPermission = $role->hasPermission($request->route()->getName(), $role->id);
+        $permissionSlug = $request->route()->getName();
+        $hasPermission = $role->hasPermission($permissionSlug, $role->id);
 
         if ($hasPermission) {
             return $next($request);
         } else {
-            abort(401);
+            abort(403, 'Unauthorized');
         }
     }
 }

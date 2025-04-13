@@ -26,21 +26,43 @@ class PermissionSeeder extends Seeder
             })
             ->groupBy('folder');
 
+        // List of routes to skip
+        $excludeRoutes = [
+            'login',
+            'forgot-password',
+            'reset-password',
+            'verify-email',
+            'verify-email/{id}/{hash}',
+            'storage/{path}',
+            'up',
+            '/',
+            'register',
+            'reset-password/{token}',
+            'confirm-password',
+            'dashboard',
+            'logout',
+            'register.categories',
+            'register.store-categories',
+            'register.incomes',
+            'register.store-incomes',
+            'register.forecast',
+            'register.finalize',
+            'select.role',
+            'choose.role',
+            'password.request',
+            'password.email',
+            'password.reset',
+            'password.store',
+            'verification.notice',
+            'verification.verify',
+            'verification.send',
+            'password.confirm',
+            'password.update',
+        ];
+
         foreach ($routes as $folder => $folderRoute) {
             foreach ($folderRoute as $route) {
-                if (in_array($route['uri'], [
-                    'login',
-                    'forgot-password',
-                    'reset-password',
-                    'verify-email',
-                    'verify-email/{id}/{hash}',
-                    'storage/{path}',
-                    'up',
-                    '/',
-                    'register',
-                    'reset-password/{token}',
-                    'confirm-password',
-                ])) {
+                if (collect($excludeRoutes)->contains(fn($exclude) => Str::is($exclude, $route['name']))) {
                     continue;
                 }
 
@@ -48,14 +70,24 @@ class PermissionSeeder extends Seeder
                     continue;
                 }
 
+                $permissionName = $this->formatPermissionName($route['name']);
 
                 Permission::firstOrCreate([
                     'name' => $route['name'],
                     'uri' => $route['uri'],
                     'group' => $folder,
-                    'slug' => Str::slug(str_replace('.', ' ', $route['name'])),
+                    'slug' => $permissionName,
                 ]);
             }
         }
+    }
+
+
+    /**
+     * Format the permission name for better readability.
+     */
+    private function formatPermissionName($name)
+    {
+        return ucwords(str_replace('.', ' ', $name));
     }
 }
