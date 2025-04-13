@@ -12,6 +12,17 @@
 <div class="container mt-5">
     <h1 class="text-center mb-4">Edit Incomes</h1>
     <div class="container">
+
+        @if(session()->has('error'))
+            <div class="alert alert-danger">
+                {{ session('error') }}
+            </div>
+        @elseif(session()->has('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
+
         <h1 class="my-4">Edit Income</h1>
 
         <form action="{{ route('incomes.update', $income->id) }}" method="POST">
