@@ -33,6 +33,8 @@ Route::middleware(['auth','permission:user'])->group(function () {
 
     Route::resource('incomes', IncomeController::class);
     Route::post('incomes.filter', [IncomeController::class, 'filter'])->name('incomes.filter');
+
+    Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
 });
 
 Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
@@ -74,7 +76,4 @@ Route::middleware(['auth'])->group(function () {
 
 Route::get('/select-role', [AuthenticatedSessionController::class, 'selectRole'])->name('select.role');
 Route::post('/select-role', [AuthenticatedSessionController::class, 'chooseRole'])->name('choose.role');
-
-Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
-
 require __DIR__.'/auth.php';

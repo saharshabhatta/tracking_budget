@@ -20,16 +20,15 @@ class UserSeeder extends Seeder
             'last_name' => 'Testing',
             'email' => 'admin@gmail.com',
             'phone' => '9841351767',
-            'password' => Hash::make('123456789'),
-            'role' => 'user',
+            'password' => Hash::make('123456789')
         ]);
 
-        $role = Role::where('name', 'user')->first();
+        $role = Role::where('name', 'admin')->first();
 
         if ($role) {
             $user->roles()->attach($role->id);
         }
-
     }
+
 }
 
