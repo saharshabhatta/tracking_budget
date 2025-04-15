@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class storeIncomeRequest extends FormRequest
+class FilterRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,11 +22,8 @@ class storeIncomeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'income_type' => ['required', 'in:monthly,annual'],
-            'monthly_income' => ['nullable', 'numeric', 'min:0', 'required_if:income_type,monthly'],
-            'annual_income' => ['nullable', 'numeric', 'min:0', 'required_if:income_type,annual'],
-            'category_percentages' => ['required', 'array'],
-            'category_percentages.*' => ['numeric', 'between:0,100'],
+           'from' => 'before_or_equal:end_date',
+            'to' => 'after_or_equal:start_date',
         ];
     }
 }

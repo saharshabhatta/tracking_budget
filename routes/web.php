@@ -19,7 +19,7 @@ Route::get('/', function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('dashboard', [DashboardController::class, 'index'])->middleware('forecast')->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 });
 
 Route::middleware(['auth','permission:user'])->group(function () {
@@ -27,8 +27,8 @@ Route::middleware(['auth','permission:user'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::resource('categories', CategoryController::class)->middleware('forecast');
-    Route::resource('expenses', ExpenseController::class)->middleware('forecast');
+    Route::resource('categories', CategoryController::class);
+    Route::resource('expenses', ExpenseController::class);
     Route::post('expenses.filter', [ExpenseController::class, 'filter'])->name('expenses.filter');
 
     Route::resource('incomes', IncomeController::class);
@@ -46,7 +46,7 @@ Route::post('register/incomes', [RegisteredUserController::class, 'storeIncome']
 Route::get('register/forecast', [RegisteredUserController::class, 'showForecast'])->name('register.forecast');
 Route::post('register/finalize', [RegisteredUserController::class, 'finalizeRegistration'])->name('register.finalize');
 
-Route::middleware(['auth','permission:admin'])->group(function () {
+Route::middleware(['admin','permission:admin'])->group(function () {
     Route::get('admin/users', [AdminController::class, 'showUsers'])->name('admin.users');
     Route::get('/admin/user/{userId}/categories', [AdminController::class, 'showUserCategories'])->name('admin.userCategories');
     Route::get('admin/categories', [AdminController::class, 'displayCategories'])->name('admin.categories');
@@ -76,4 +76,5 @@ Route::middleware(['auth'])->group(function () {
 
 Route::get('/select-role', [AuthenticatedSessionController::class, 'selectRole'])->name('select.role');
 Route::post('/select-role', [AuthenticatedSessionController::class, 'chooseRole'])->name('choose.role');
+
 require __DIR__.'/auth.php';

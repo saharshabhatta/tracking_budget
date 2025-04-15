@@ -31,13 +31,17 @@ class CheckPermission
             abort(403, 'Roles not assigned');
         }
 
+        if ($role->name === 'super_admin') {
+            return $next($request);
+        }
+
         $permissionSlug = $request->route()->getName();
         $hasPermission = $role->hasPermission($permissionSlug, $role->id);
 
         if ($hasPermission) {
             return $next($request);
-        } else {
-            abort(403, 'Unauthorized');
         }
+
+        abort(403, 'Unauthorized');
     }
 }

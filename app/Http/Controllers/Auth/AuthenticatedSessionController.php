@@ -39,13 +39,12 @@ class AuthenticatedSessionController extends Controller
         $role = $user->roles->first();
         session(['active_role' => $role->name]);
 
-        if ($role->name === 'admin') {
+        if (in_array($role->name, ['admin', 'super_admin'])) {
             return redirect()->route('admin.dashboard');
         }
 
         return redirect()->intended(route('dashboard', absolute: false));
     }
-
 
     public function selectRole()
     {
@@ -67,7 +66,6 @@ class AuthenticatedSessionController extends Controller
 
         return redirect()->intended(route('dashboard', absolute: false));
     }
-
 
 
     /**

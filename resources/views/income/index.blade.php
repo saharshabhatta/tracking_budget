@@ -17,9 +17,15 @@
         <div class="row">
             <div class="col-md-3">
                 <input type="date" name="from" value="{{ request('from') }}" class="form-control" placeholder="From">
+                @error('from')
+                <div class="text-danger">{{ $message }}</div>
+                @enderror
             </div>
             <div class="col-md-3">
                 <input type="date" name="to" value="{{ request('to') }}" class="form-control" placeholder="To">
+                @error('to')
+                <div class="text-danger">{{ $message }}</div>
+                @enderror
             </div>
             <div class="col-md-3">
                 <button type="submit" class="btn btn-secondary w-100">Filter</button>

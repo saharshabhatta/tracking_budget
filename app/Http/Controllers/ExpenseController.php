@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\FilterRequest;
 use App\Http\Requests\storeExpenseRequest;
 use App\Models\Expense;
 use App\Models\Category;
@@ -16,7 +17,7 @@ class ExpenseController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(FilterRequest $request)
     {
         $userId = auth()->id();
         $query = Expense::with('category')->where('user_id', $userId);
@@ -75,16 +76,16 @@ class ExpenseController extends Controller
         $currentMonth = now()->month;
         $currentYear = now()->year;
 
-        $userCategories = Category::whereHas('users', function($query) use ($userId) {
-            $query->where('user_id', $userId);
-        })->whereHas('expenses', function ($query) use ($userId, $currentMonth, $currentYear) {
+        $userCategories = Category::whereHas('users', function($query) use ($userId, $currentMonth, $currentYear) {
             $query->where('user_id', $userId)
-                ->whereMonth('date', $currentMonth)
-                ->whereYear('date', $currentYear);
-        })->get();
+                ->whereMonth('create_date', $currentMonth)
+                ->whereYear('create_date', $currentYear);
+        })
+            ->get();
 
         return view('expenses.create', compact('userCategories'));
     }
+
 
 
     /**

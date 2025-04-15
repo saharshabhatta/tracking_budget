@@ -15,20 +15,46 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        $user = User::create([
-            'first_name' => 'Test',
-            'last_name' => 'Testing',
-            'email' => 'admin@gmail.com',
-            'phone' => '9841351767',
-            'password' => Hash::make('123456789')
+        $superAdmin = User::create([
+            'first_name' => 'Super',
+            'last_name' => 'Admin',
+            'email' => 'superadmin@gmail.com',
+            'phone' => '9800000000',
+            'password' => \Hash::make('superadmin')
         ]);
 
-        $role = Role::where('name', 'admin')->first();
+        $superAdminRole = Role::where('name', 'super_admin')->first();
 
-        if ($role) {
-            $user->roles()->attach($role->id);
+        if ($superAdminRole) {
+            $superAdmin->roles()->attach($superAdminRole->id);
+        }
+
+        $admin = User::create([
+            'first_name' => 'Admin',
+            'last_name' => 'Admin',
+            'email' => 'admin@gmail.com',
+            'phone' => '9841351767',
+            'password' => \Hash::make('admin')
+        ]);
+
+        $adminRole = Role::where('name', 'admin')->first();
+
+        if ($adminRole) {
+            $admin->roles()->attach($adminRole->id);
+        }
+
+        $user = User::create([
+            'first_name' => 'User',
+            'last_name' => 'User',
+            'email' => 'user@gmail.com',
+            'phone' => '9812345678',
+            'password' => \Hash::make('user')
+        ]);
+
+        $userRole = Role::where('name', 'user')->first();
+
+        if ($userRole) {
+            $user->roles()->attach($userRole->id);
         }
     }
-
 }
-

@@ -17,10 +17,6 @@ class DashboardController extends Controller
         $currentMonth = Carbon::now()->month;
         $currentYear = Carbon::now()->year;
 
-        if (!$this->hasCategoriesForCurrentMonth($user, $currentMonth, $currentYear)) {
-            return redirect()->route('register.categories');
-        }
-
         $selectedMonthYear = $request->query('month');
         $selectedMonth = $selectedMonthYear ? (int) substr($selectedMonthYear, 5, 2) : Carbon::now()->month;
         $selectedYear = $selectedMonthYear ? (int) substr($selectedMonthYear, 0, 4) : Carbon::now()->year;
@@ -64,7 +60,6 @@ class DashboardController extends Controller
             'selectedYear'
         ));
     }
-
 
     public function getUserIncomeForMonth($user, $selectedMonth, $selectedYear)
     {

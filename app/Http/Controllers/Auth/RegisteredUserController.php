@@ -69,9 +69,12 @@ class RegisteredUserController extends Controller
     }
 
 
-
     public function showCategories()
     {
+        if (!Auth::check()) {
+            return redirect()->route('register')->withErrors(['error' => 'Please register first.']);
+        }
+
         $categories = Category::whereHas('user', function ($query) {
             $query->whereHas('roles', function ($query) {
                 $query->where('name', Roles::ADMIN);
@@ -89,33 +92,47 @@ class RegisteredUserController extends Controller
 
         try {
             if ($request->new_category) {
-                $newCategory = Category::create([
-                    'name' => $request->new_category,
-                    'user_id' => $user->id,
+                $existingCategory = Category::whereRaw('LOWER(name) = ?', [strtolower($request->new_category)])->first();
+
+                if ($existingCategory) {
+                    $categoryIdToLink = $existingCategory->id;
+                } else {
+                    $newCategory = Category::create([
+                        'name' => $request->new_category,
+                        'user_id' => $user->id,
+                    ]);
+                    $categoryIdToLink = $newCategory->id;
+                }
+
+                $request->merge([
+                    'categories' => array_merge($request->categories ?? [], [$categoryIdToLink])
                 ]);
-                $request->merge(['categories' => array_merge($request->categories, [$newCategory->id])]);
             }
 
             foreach ($request->categories as $categoryId) {
-                UserCategory::create([
+                UserCategory::firstOrCreate([
                     'user_id' => $user->id,
                     'category_id' => $categoryId,
+                ], [
                     'spending_percentage' => 0
                 ]);
             }
 
             DB::commit();
             return redirect()->route('register.incomes');
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             DB::rollBack();
             return back()->withErrors(['error' => 'Failed to store categories, please try again.']);
         }
     }
 
-
     public function showIncome()
     {
         $user = Auth::user();
+
+        if (!Auth::check()) {
+            return redirect()->route('register')->withErrors(['error' => 'Please register first.']);
+        }
 
         $categories = UserCategory::where('user_id', $user->id)
             ->with('category')
@@ -139,12 +156,20 @@ class RegisteredUserController extends Controller
                 return back()->withErrors(['error' => 'The total category percentages cannot exceed 100%.']);
             }
 
+            $monthlyIncome = $request->income_type === 'monthly'
+                ? $request->monthly_income
+                : round($request->annual_income / 12, 2);
+
+            $annualIncome = $request->income_type === 'annual'
+                ? $request->annual_income
+                : round($request->monthly_income * 12, 2);
+
             $userIncome = UserIncome::create([
                 'user_id' => $user->id,
                 'month' => $currentMonth,
                 'year' => $currentYear,
-                'monthly_income' => $request->monthly_income,
-                'annual_income' => $request->annual_income,
+                'monthly_income' => $monthlyIncome,
+                'annual_income' => $annualIncome,
             ]);
 
             $statement = new Statement();
@@ -164,7 +189,6 @@ class RegisteredUserController extends Controller
             return back()->withErrors(['error' => 'Failed to store income data, please try again.']);
         }
     }
-
 
     public function finalizeRegistration()
     {

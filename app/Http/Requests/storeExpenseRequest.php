@@ -24,8 +24,8 @@ class storeExpenseRequest extends FormRequest
     {
         return [
             'category_id' => 'required|exists:categories,id',
-            'amount' => 'required|numeric|min:0',
-            'description' => 'nullable|string',
+            'amount' => 'required|numeric|min:1',
+            'description' => 'required|string',
             'date' => ['required', 'date', new FutureDateRule()],
         ];
     }

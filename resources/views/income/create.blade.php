@@ -25,16 +25,27 @@
             @csrf
 
             <div class="form-group">
-                <label for="monthly_income">Monthly Income</label>
-                <input type="number" name="monthly_income" id="monthly_income" class="form-control" {{ old('monthly_income') }} required>
+                <label>Choose Income Type:</label>
+                <div>
+                    <input type="radio" name="income_type" value="monthly" id="monthlyOption" checked>
+                    <label for="monthlyOption">Monthly Income</label>
+
+                    <input type="radio" name="income_type" value="annual" id="annualOption">
+                    <label for="annualOption">Annual Income</label>
+                </div>
+            </div>
+
+            <div class="form-group" id="monthlyIncomeGroup">
+                <label for="monthly_income">Monthly Income:</label>
+                <input type="number" class="form-control" name="monthly_income" value="{{ old('monthly_income') }}">
                 @error('monthly_income')
                 <div class="text-danger">{{ $message }}</div>
                 @enderror
             </div>
 
-            <div class="form-group">
-                <label for="annual_income">Annual Income</label>
-                <input type="number" name="annual_income" id="annual_income" class="form-control" {{ old('annual_income') }} required>
+            <div class="form-group" id="annualIncomeGroup" style="display:none;">
+                <label for="annual_income">Annual Income:</label>
+                <input type="number" class="form-control" name="annual_income" value="{{ old('annual_income') }}">
                 @error('annual_income')
                 <div class="text-danger">{{ $message }}</div>
                 @enderror
@@ -43,5 +54,26 @@
             <button type="submit" class="btn btn-primary">Save Income</button>
         </form>
     </div>
+<script>
+    const monthlyOption = document.getElementById('monthlyOption');
+    const annualOption = document.getElementById('annualOption');
+    const monthlyGroup = document.getElementById('monthlyIncomeGroup');
+    const annualGroup = document.getElementById('annualIncomeGroup');
+
+    function toggleIncomeFields() {
+        if (monthlyOption.checked) {
+            monthlyGroup.style.display = 'block';
+            annualGroup.style.display = 'none';
+        } else {
+            monthlyGroup.style.display = 'none';
+            annualGroup.style.display = 'block';
+        }
+    }
+
+    monthlyOption.addEventListener('change', toggleIncomeFields);
+    annualOption.addEventListener('change', toggleIncomeFields);
+
+    window.onload = toggleIncomeFields;
+</script>
 </body>
 </html>

@@ -59,14 +59,6 @@
             <input type="password" class="form-control" name="password_confirmation" required>
         </div>
 
-        {{--        <div class="form-group">--}}
-        {{--            <label for="role">Roles:</label>--}}
-        {{--            <select name="role" class="form-control" required>--}}
-        {{--                @foreach($roles as $role)--}}
-        {{--                    <option value="{{ $role->name }}">{{ ucfirst($role->name) }}</option>--}}
-        {{--                @endforeach--}}
-        {{--            </select>--}}
-        {{--        </div>--}}
 
         <button type="submit" class="btn btn-primary btn-block">Next</button>
     </form>

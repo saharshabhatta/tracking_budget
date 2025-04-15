@@ -20,7 +20,6 @@
 </head>
 <body>
 
-<!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
     <div class="container">
         <a class="navbar-brand fw-bold text-primary" href="#">Expense Tracker</a>
@@ -31,7 +30,6 @@
     </div>
 </nav>
 
-<!-- Hero Section -->
 <section class="hero">
     <div class="container">
         <h1 class="display-4 fw-bold">Take Control of Your Finances</h1>
@@ -40,7 +38,6 @@
     </div>
 </section>
 
-<!-- Features Section -->
 <section class="py-5 bg-light">
     <div class="container text-center">
         <h2 class="mb-5 fw-bold">Why Choose Our Tracker?</h2>
@@ -48,16 +45,16 @@
             <div class="col-md-4">
                 <div class="card h-100 shadow-sm border-0">
                     <div class="card-body">
-                        <div class="feature-icon mb-3">📊</div>
+                        <div class="feature-icon mb-3"></div>
                         <h5 class="card-title fw-semibold">Visual Insights</h5>
-                        <p class="card-text">See where your money goes with charts and graphs that help you stay on track.</p>
+                        <p class="card-text">See where your money goes help you stay on track.</p>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="card h-100 shadow-sm border-0">
                     <div class="card-body">
-                        <div class="feature-icon mb-3">📅</div>
+                        <div class="feature-icon mb-3"></div>
                         <h5 class="card-title fw-semibold">Monthly Forecast</h5>
                         <p class="card-text">Get accurate forecasts based on past spending and plan for the future easily.</p>
                     </div>
@@ -66,7 +63,7 @@
             <div class="col-md-4">
                 <div class="card h-100 shadow-sm border-0">
                     <div class="card-body">
-                        <div class="feature-icon mb-3">🔒</div>
+                        <div class="feature-icon mb-3"></div>
                         <h5 class="card-title fw-semibold">Secure & Private</h5>
                         <p class="card-text">Your financial data is safe and protected with strong encryption protocols.</p>
                     </div>
@@ -76,7 +73,6 @@
     </div>
 </section>
 
-<!-- Footer -->
 <footer class="bg-white text-center py-4 border-top mt-5">
     <div class="container">
         <p class="mb-0 text-muted">&copy; {{ date('Y') }} Expense Tracker. All rights reserved.</p>

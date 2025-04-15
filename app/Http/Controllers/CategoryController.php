@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\storeCategoryRequest;
+use App\Http\Requests\FilterRequest;
 use App\Models\Category;
 use App\Models\UserCategory;
 use Carbon\Carbon;
@@ -55,19 +55,19 @@ class CategoryController extends Controller
      * Store a newly created resource in storage.
      */
 
-    public function store(storeCategoryRequest $request)
+    public function store(FilterRequest $request)
     {
         DB::beginTransaction();
 
         try {
             $now = Carbon::now();
+            $userId = auth()->id();
+            $newPercentage = $request->input('spending_percentage');
 
-            $totalSpent = UserCategory::where('user_id', auth()->id())
+            $totalSpent = UserCategory::where('user_id', $userId)
                 ->whereMonth('create_date', $now->month)
                 ->whereYear('create_date', $now->year)
                 ->sum('spending_percentage');
-
-            $newPercentage = $request->input('spending_percentage');
 
             if (($totalSpent + $newPercentage) > 100) {
                 $remaining = 100 - $totalSpent;
@@ -75,31 +75,34 @@ class CategoryController extends Controller
                 return back()->withInput();
             }
 
-            $category = Category::where('name', $request->name)->first();
+            $category = Category::withTrashed()
+                ->whereRaw('LOWER(name) = ?', [strtolower($request->name)])
+                ->first();
 
-            if ($category && $category->user_id != auth()->id()) {
-                UserCategory::create([
-                    'user_id' => auth()->id(),
-                    'spending_percentage' => $newPercentage,
-                    'category_id' => $category->id,
-                ]);
-                DB::commit();
-                return redirect('/categories')->with('success', 'You have been successfully associated with the existing category.');
+            if ($category && $category->trashed() && $category->user_id == $userId) {
+                $category->restore();
             }
 
-            if ($category && $category->trashed()) {
-                $category->restore();
+            if ($category) {
+                $alreadyLinked = UserCategory::where('user_id', $userId)
+                    ->where('category_id', $category->id)
+                    ->exists();
+
+                if ($alreadyLinked) {
+                    session()->flash('error', 'Category already exists.');
+                    return back()->withInput();
+                }
             }
 
             if (!$category) {
                 $category = Category::create([
-                    'user_id' => auth()->id(),
-                    'name' => $request->input('name'),
+                    'user_id' => $userId,
+                    'name' => $request->name,
                 ]);
             }
 
             UserCategory::create([
-                'user_id' => auth()->id(),
+                'user_id' => $userId,
                 'spending_percentage' => $newPercentage,
                 'category_id' => $category->id,
             ]);
@@ -107,12 +110,11 @@ class CategoryController extends Controller
             DB::commit();
             return redirect('/categories')->with('success', 'Category added successfully!');
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withError('Something went wrong. Please try again later.');
+            return back()->withErrors(['error' => 'Something went wrong. Please try again later.']);
         }
     }
-
 
     /**
      * Display the specified resource.
@@ -154,7 +156,7 @@ class CategoryController extends Controller
      * Update the specified resource in storage.
      */
 
-    public function update(storeCategoryRequest $request, string $id)
+    public function update(FilterRequest $request, string $id)
     {
         DB::beginTransaction();
 
@@ -177,9 +179,33 @@ class CategoryController extends Controller
                 return back()->withInput();
             }
 
+            $isCategoryNameUpdated = $request->has('name') && $request->name !== $category->name;
+
+            if (!$isCategoryNameUpdated) {
+                UserCategory::where('user_id', auth()->id())
+                    ->where('category_id', $category->id)
+                    ->update(['spending_percentage' => $newPercentage]);
+
+                DB::commit();
+                return redirect('/categories')->with('success', 'Spending percentage updated successfully!');
+            }
+
             $existingCategory = Category::where('name', $request->name)->first();
 
-            if ($existingCategory && $existingCategory->user_id != auth()->id()) {
+            if ($existingCategory) {
+                $alreadyLinked = UserCategory::where('user_id', auth()->id())
+                    ->where('category_id', $existingCategory->id)
+                    ->exists();
+
+                if ($alreadyLinked) {
+                    session()->flash('error', 'You are already associated with this category.');
+                    return back()->withInput();
+                }
+
+                if ($existingCategory->trashed()) {
+                    $existingCategory->restore();
+                }
+
                 UserCategory::where('user_id', auth()->id())
                     ->where('category_id', $category->id)
                     ->delete();
@@ -194,17 +220,10 @@ class CategoryController extends Controller
                 return redirect('/categories')->with('success', 'You have been successfully associated with the existing category.');
             }
 
-            if ($existingCategory && $existingCategory->trashed()) {
-                $existingCategory->restore();
-            }
-
-            if (!$existingCategory) {
-                $existingCategory = Category::create([
-                    'user_id' => auth()->id(),
-                    'name' => $request->input('name'),
-                ]);
-            }
-
+            $newCategory = Category::create([
+                'user_id' => auth()->id(),
+                'name' => $request->input('name'),
+            ]);
             UserCategory::where('user_id', auth()->id())
                 ->where('category_id', $category->id)
                 ->delete();
@@ -212,18 +231,17 @@ class CategoryController extends Controller
             UserCategory::create([
                 'user_id' => auth()->id(),
                 'spending_percentage' => $newPercentage,
-                'category_id' => $existingCategory->id,
+                'category_id' => $newCategory->id,
             ]);
 
             DB::commit();
             return redirect('/categories')->with('success', 'Category updated successfully!');
 
-        } catch (Exception $e) {
+        } catch (Exception ) {
             DB::rollBack();
             return back()->withError('Something went wrong. Please try again later.');
         }
     }
-
 
     /**
      * Remove the specified resource from storage.

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\FilterRequest;
 use App\Models\UserIncome;
 use Exception;
 use Illuminate\Http\Request;
@@ -27,7 +28,7 @@ class IncomeController extends Controller
         return view('income.index', compact('income'));
     }
 
-    public function filter(Request $request)
+    public function filter(FilterRequest $request)
     {
         $query = UserIncome::where('user_id', Auth::id());
 
@@ -54,9 +55,18 @@ class IncomeController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'monthly_income' => 'required|numeric|min:0',
-            'annual_income' => 'required|numeric|min:0',
+            'income_type' => ['required', 'in:monthly,annual'],
+            'monthly_income' => ['nullable', 'numeric', 'min:0', 'required_if:income_type,monthly'],
+            'annual_income' => ['nullable', 'numeric', 'min:0', 'required_if:income_type,annual'],
         ]);
+
+        $monthlyIncome = $request->income_type === 'monthly'
+            ? $request->monthly_income
+            : round($request->annual_income / 12, 2);
+
+        $annualIncome = $request->income_type === 'annual'
+            ? $request->annual_income
+            : round($request->monthly_income * 12, 2);
 
         $currentMonth = now()->month;
         $currentYear = now()->year;
@@ -67,8 +77,8 @@ class IncomeController extends Controller
                 'user_id' => Auth::id(),
                 'month' => $currentMonth,
                 'year' => $currentYear,
-                'monthly_income' => $request->monthly_income,
-                'annual_income' => $request->annual_income
+                'monthly_income' => $monthlyIncome,
+                'annual_income' => $annualIncome
             ]);
 
             DB::commit();
@@ -78,7 +88,6 @@ class IncomeController extends Controller
             return redirect()->route('incomes.index')->with('error', 'Something went wrong: ' . $e->getMessage());
         }
     }
-
 
     /**
      * Display the specified resource.
@@ -103,9 +112,18 @@ class IncomeController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-            'monthly_income' => 'required|numeric|min:0',
-            'annual_income' => 'required|numeric|min:0',
+            'income_type' => ['required', 'in:monthly,annual'],
+            'monthly_income' => ['nullable', 'numeric', 'min:0', 'required_if:income_type,monthly'],
+            'annual_income' => ['nullable', 'numeric', 'min:0', 'required_if:income_type,annual'],
         ]);
+
+        $monthlyIncome = $request->income_type === 'monthly'
+            ? $request->monthly_income
+            : round($request->annual_income / 12, 2);
+
+        $annualIncome = $request->income_type === 'annual'
+            ? $request->annual_income
+            : round($request->monthly_income * 12, 2);
 
         DB::beginTransaction();
 
@@ -113,15 +131,15 @@ class IncomeController extends Controller
             $income=UserIncome::findOrFail($id);
 
             $income->update([
-                'monthly_income'=>$request->monthly_income,
-                'annual_income'=>$request->annual_income,
+                'monthly_income'=>$monthlyIncome,
+                'annual_income'=>$annualIncome,
             ]);
             DB::commit();
             return redirect()->route('incomes.index');
         }
-        catch (Exception){
+        catch (Exception $e){
             DB::rollBack();
-            return redirect()->route('incomes.index')->with('error','Something went wrong');
+            return redirect()->route('incomes.index')->with('error','Something went wrong'. $e->getMessage());
         }
     }
 

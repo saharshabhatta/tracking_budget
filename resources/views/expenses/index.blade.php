@@ -13,13 +13,18 @@
 <div class="container mt-5">
     <h1 class="text-center mb-4">Expenses</h1>
 
-    <!-- Filter Form -->
     <form method="GET" action="{{ route('expenses.index') }}" class="mb-4 row g-3">
         <div class="col-md-3">
             <input type="date" name="from" value="{{ request('from') }}" class="form-control" placeholder="From">
+            @error('from')
+            <div class="text-danger">{{ $message }}</div>
+            @enderror
         </div>
         <div class="col-md-3">
             <input type="date" name="to" value="{{ request('to') }}" class="form-control" placeholder="To">
+            @error('to')
+            <div class="text-danger">{{ $message }}</div>
+            @enderror
         </div>
         <div class="col-md-3">
             <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="Search Expenses">
@@ -29,12 +34,10 @@
         </div>
     </form>
 
-    <!-- Add Expense Button -->
     <div class="mb-3 text-end">
         <a href="{{ route('expenses.create') }}" class="btn btn-primary">Add New Expense</a>
     </div>
 
-    <!-- Grouped Expenses by Month -->
     @php
         $grouped = $expenses->groupBy(fn($expense) => Carbon::parse($expense->date)->format('Y-m'));
     @endphp

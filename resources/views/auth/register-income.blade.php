@@ -7,31 +7,40 @@
     <title>Income and Category Percentages</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
-
 <body>
-{{--@include('layouts.navbar')--}}
 
 <div class="container mt-5">
     <h2 class="text-center mb-4">Income and Category Percentages</h2>
 
     <form id="incomeForm" action="{{ route('register.store-incomes') }}" method="POST">
         @csrf
-
         <div class="form-group">
+            <label>Choose Income Type:</label>
+            <div>
+                <input type="radio" name="income_type" value="monthly" id="monthlyOption" checked>
+                <label for="monthlyOption">Monthly Income</label>
+
+                <input type="radio" name="income_type" value="annual" id="annualOption">
+                <label for="annualOption">Annual Income</label>
+            </div>
+        </div>
+
+        <div class="form-group" id="monthlyIncomeGroup">
             <label for="monthly_income">Monthly Income:</label>
-            <input type="number" class="form-control" name="monthly_income" value="{{ old('monthly_income') }}" required>
+            <input type="number" class="form-control" name="monthly_income" value="{{ old('monthly_income') }}">
             @error('monthly_income')
             <div class="text-danger">{{ $message }}</div>
             @enderror
         </div>
 
-        <div class="form-group">
+        <div class="form-group" id="annualIncomeGroup" style="display:none;">
             <label for="annual_income">Annual Income:</label>
-            <input type="number" class="form-control" name="annual_income" value="{{ old('annual_income') }}" required>
+            <input type="number" class="form-control" name="annual_income" value="{{ old('annual_income') }}">
             @error('annual_income')
             <div class="text-danger">{{ $message }}</div>
             @enderror
         </div>
+
 
         <h3>Define Percentages for Categories:</h3>
 
@@ -67,6 +76,27 @@
             alert('The total category percentages cannot exceed 100%. Please adjust the percentages.');
         }
     });
+</script>
+<script>
+    const monthlyOption = document.getElementById('monthlyOption');
+    const annualOption = document.getElementById('annualOption');
+    const monthlyGroup = document.getElementById('monthlyIncomeGroup');
+    const annualGroup = document.getElementById('annualIncomeGroup');
+
+    function toggleIncomeFields() {
+        if (monthlyOption.checked) {
+            monthlyGroup.style.display = 'block';
+            annualGroup.style.display = 'none';
+        } else {
+            monthlyGroup.style.display = 'none';
+            annualGroup.style.display = 'block';
+        }
+    }
+
+    monthlyOption.addEventListener('change', toggleIncomeFields);
+    annualOption.addEventListener('change', toggleIncomeFields);
+
+    window.onload = toggleIncomeFields;
 </script>
 
 </body>

@@ -22,9 +22,14 @@ class storeCategoryNameRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'categories' => ['required', 'array'],
+            'categories' => ['required_without:new_category', 'array'],
             'categories.*' => ['exists:categories,id'],
-            'new_category' => ['nullable', 'string', 'max:255'],
+            'new_category' => ['nullable', 'string', 'max:255', function ($attribute, $value, $fail) {
+                if ($value !== null && $value !== '') {
+                    return;
+                }
+            }],
         ];
     }
+
 }
