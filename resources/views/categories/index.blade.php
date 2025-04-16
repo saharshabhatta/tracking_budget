@@ -20,6 +20,9 @@
 
         <div class="col-md-4">
             <input type="month" name="month" class="form-control" value="{{ $selectedMonth }}">
+            @error('month')
+            <div class="text-danger">{{ $message }}</div>
+            @enderror
         </div>
 
         <div class="col-md-3 d-grid">

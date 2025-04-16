@@ -39,12 +39,19 @@ class AuthenticatedSessionController extends Controller
         $role = $user->roles->first();
         session(['active_role' => $role->name]);
 
-        if (in_array($role->name, ['admin', 'super_admin'])) {
+        if ($role->name === 'admin') {
             return redirect()->route('admin.dashboard');
         }
 
+        if ($role->name === 'super_admin') {
+            return redirect()->route('admin.dashboard');
+        }
+
+        // If it's any other role, redirect to the intended route
         return redirect()->intended(route('dashboard', absolute: false));
     }
+
+
 
     public function selectRole()
     {

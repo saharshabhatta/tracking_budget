@@ -9,15 +9,15 @@
 <body class="bg-light">
 @include('layouts.navbar')
     <div class="container">
-        @if(session()->has('error'))
-            <div class="alert alert-danger">
-                {{ session('error') }}
-            </div>
-        @elseif(session()->has('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
-        @endif
+{{--        @if (session('errors'))--}}
+{{--            <div class="alert alert-danger">--}}
+{{--                <ul>--}}
+{{--                    @foreach ($errors->all() as $error)--}}
+{{--                        <p>{{ $error }}</p>--}}
+{{--                    @endforeach--}}
+{{--                </ul>--}}
+{{--            </div>--}}
+{{--        @endif--}}
 
         <h1 class="my-4">Add Income</h1>
 

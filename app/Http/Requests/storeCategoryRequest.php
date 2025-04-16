@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\UniqueUserCategory;
 use Illuminate\Foundation\Http\FormRequest;
 
 class storeCategoryRequest extends FormRequest
@@ -19,11 +20,13 @@ class storeCategoryRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
+
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
+            'name' => ['required', 'string', 'max:255', new UniqueUserCategory],
             'spending_percentage' => 'required|numeric|min:0|max:100',
         ];
     }
+
 }

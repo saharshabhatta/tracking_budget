@@ -13,13 +13,13 @@
 @include('layouts.adminNavbar')
 <div class="container mt-4">
 
-    @if(session()->has('error'))
+    @if (session('errors'))
         <div class="alert alert-danger">
-            {{ session('error') }}
-        </div>
-    @elseif(session()->has('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <p>{{ $error }}</p>
+                @endforeach
+            </ul>
         </div>
     @endif
 

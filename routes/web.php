@@ -18,11 +18,11 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'forecast'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 });
 
-Route::middleware(['auth','permission:user'])->group(function () {
+Route::middleware(['auth','permission:user', 'forecast'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -37,16 +37,18 @@ Route::middleware(['auth','permission:user'])->group(function () {
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
 });
 
-Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
-Route::post('register/personal-info', [RegisteredUserController::class, 'storePersonalInfo'])->name('register.personal-info');
-Route::get('register/categories', [RegisteredUserController::class, 'showCategories'])->name('register.categories');
-Route::post('register/categories', [RegisteredUserController::class, 'storeCategories'])->name('register.store-categories');
-Route::get('register/incomes', [RegisteredUserController::class, 'showIncome'])->name('register.incomes');
-Route::post('register/incomes', [RegisteredUserController::class, 'storeIncome'])->name('register.store-incomes');
-Route::get('register/forecast', [RegisteredUserController::class, 'showForecast'])->name('register.forecast');
-Route::post('register/finalize', [RegisteredUserController::class, 'finalizeRegistration'])->name('register.finalize');
+Route::middleware(['registered'])->group(function () {
+    Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
+    Route::post('register/personal-info', [RegisteredUserController::class, 'storePersonalInfo'])->name('register.personal-info');
+    Route::get('register/categories', [RegisteredUserController::class, 'showCategories'])->name('register.categories');
+    Route::post('register/categories', [RegisteredUserController::class, 'storeCategories'])->name('register.store-categories');
+    Route::get('register/incomes', [RegisteredUserController::class, 'showIncome'])->name('register.incomes');
+    Route::post('register/incomes', [RegisteredUserController::class, 'storeIncome'])->name('register.store-incomes');
+    Route::get('register/forecast', [RegisteredUserController::class, 'showForecast'])->name('register.forecast');
+    Route::post('register/finalize', [RegisteredUserController::class, 'finalizeRegistration'])->name('register.finalize');
+});
 
-Route::middleware(['admin','permission:admin'])->group(function () {
+Route::middleware(['permission:admin'])->group(function () {
     Route::get('admin/users', [AdminController::class, 'showUsers'])->name('admin.users');
     Route::get('/admin/user/{userId}/categories', [AdminController::class, 'showUserCategories'])->name('admin.userCategories');
     Route::get('admin/categories', [AdminController::class, 'displayCategories'])->name('admin.categories');

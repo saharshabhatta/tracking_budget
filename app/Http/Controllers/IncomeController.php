@@ -56,8 +56,11 @@ class IncomeController extends Controller
     {
         $request->validate([
             'income_type' => ['required', 'in:monthly,annual'],
-            'monthly_income' => ['nullable', 'numeric', 'min:0', 'required_if:income_type,monthly'],
-            'annual_income' => ['nullable', 'numeric', 'min:0', 'required_if:income_type,annual'],
+            'monthly_income' => ['nullable', 'numeric', 'min:0', 'required_if:income_type,monthly', 'max:9999999999999999.9999',],
+            'annual_income' => ['nullable', 'numeric', 'min:0', 'required_if:income_type,annual', 'max:9999999999999999.9999',],
+        ], [
+            'monthly_income.max' => 'The monthly income exceeds the maximum allowable.',
+            'annual_income.max' => 'The annual income exceeds the maximum allowable value .',
         ]);
 
         $monthlyIncome = $request->income_type === 'monthly'
@@ -85,7 +88,7 @@ class IncomeController extends Controller
             return redirect()->route('incomes.index');
         } catch (Exception $e) {
             DB::rollBack();
-            return redirect()->route('incomes.index')->with('error', 'Something went wrong: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Failed, please try again.']);
         }
     }
 
@@ -103,6 +106,9 @@ class IncomeController extends Controller
     public function edit(string $id)
     {
         $income = UserIncome::findOrFail($id);
+        if ($income->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
         return view('income.edit', compact('income'));
     }
 

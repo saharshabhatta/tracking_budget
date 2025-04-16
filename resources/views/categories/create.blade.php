@@ -10,15 +10,13 @@
 @include('layouts.navbar')
 
 <div class="container mt-5">
-    <h2 class="text-center mb-4">Add Category</h2>
-
-    @if(session()->has('error'))
+    @if (session('errors'))
         <div class="alert alert-danger">
-            {{ session('error') }}
-        </div>
-    @elseif(session()->has('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <p>{{ $error }}</p>
+                @endforeach
+            </ul>
         </div>
     @endif
 
@@ -32,16 +30,16 @@
         @csrf
         <div class="mb-3">
             <label for="name" class="form-label">Category Name</label>
-            <input type="text" id="name" name="name" class="form-control" value="{{ old('name') }}" required>
+            <input type="text" id="name" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}" required>
             @error('name')
-            <div class="text-danger">{{ $message }}</div>
+            <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
 
         <div class="mb-3">
             <label for="spending_percentage" class="form-label">Spending Percentage</label>
             <input type="number" id="spending_percentage" name="spending_percentage" class="form-control"
-                   value="{{ old('spending_percentage') }}" required min="0" max="{{ 100 - $totalSpent }}">
+                   value="{{ old('spending_percentage') }}" required>
             @error('spending_percentage')
             <div class="text-danger">{{ $message }}</div>
             @enderror
@@ -68,6 +66,5 @@
         }
     });
 </script>
-
 </body>
 </html>

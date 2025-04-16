@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\FilterRequest;
 use App\Http\Requests\storeCategoryNameRequest;
 use App\Models\Category;
 use App\Models\Role;
@@ -11,6 +12,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
@@ -62,7 +64,7 @@ class AdminController extends Controller
     }
 
 
-    public function displayCategories(Request $request) {
+    public function displayCategories(FilterRequest $request) {
         $searchTerm = $request->input('search', '');
 
         $categories = DB::table('categories')
@@ -85,8 +87,9 @@ class AdminController extends Controller
         }
 
         if ($request->has('from') && $request->has('to') && $request->from && $request->to) {
-            $categories->whereBetween('created_at', [$request->from, $request->to]);
+            $categories->whereBetween('categories.created_at', [$request->from, $request->to]);
         }
+
 
         $categories = $categories->paginate(5)->withQueryString();
 
@@ -98,13 +101,18 @@ class AdminController extends Controller
         return view('admin.createCategory');
     }
 
-    public function createCategory(StoreCategoryNameRequest $request)
+    public function createCategory(Request $request)
     {
+        $request->validate([
+            'name' => 'required|string|max:255|unique:categories,name',
+        ]);
+
         DB::beginTransaction();
 
         try {
             $category = Category::create([
                 'name' => $request->input('name'),
+                'user_id' => Auth::id(),
             ]);
 
             DB::commit();
@@ -153,22 +161,24 @@ class AdminController extends Controller
         return view('admin.editCategory', compact('category', 'userCount'));
     }
 
+
     public function updateCategory(Request $request, $id)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:categories,name,' . $id,
         ]);
 
         DB::beginTransaction();
 
         try {
-            $category = Category::findOrFail($id);
+            $category = Category::withTrashed()->findOrFail($id);
 
             if ($category->trashed()) {
                 $category->restore();
             }
 
             $category->name = $validated['name'];
+
             $category->save();
 
             DB::commit();
@@ -176,10 +186,10 @@ class AdminController extends Controller
             return redirect()->route('admin.categories')->with('success', 'Category updated successfully.');
         } catch (Exception $e) {
             DB::rollBack();
-
             return redirect()->route('admin.categories')->with('error', 'Something went wrong while updating the category.');
         }
     }
+
 
     public function destroyCategory(string $id) {
         try {

@@ -12,7 +12,7 @@ class RoleController extends Controller
 {
     public function index()
     {
-        $roles = Role::paginate(10);
+        $roles = Role::where('name', '!=', 'super_admin')->paginate(10);
         return view('roles.index', compact('roles'));
     }
 
@@ -28,7 +28,6 @@ class RoleController extends Controller
 
         return view('roles.index', compact('roles'));
     }
-
 
     public function show(Request $request, Role $role)
     {
@@ -90,19 +89,26 @@ class RoleController extends Controller
     /**
      * Store a newly created role in storage with transaction and error handling.
      */
-    public function store(Request $request){
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:roles,name',
+        ]);
+
         DB::beginTransaction();
 
         try {
             Role::create([
-                'name' => $request->name,
+                'name' => $validated['name'],
             ]);
 
             DB::commit();
-            return redirect()->route('roles.index');
+
+            return redirect()->route('roles.index')->with('success', 'Role created successfully!');
         } catch (Exception $e) {
             DB::rollBack();
             return back()->withErrors(['error' => 'Failed to create role, please try again.']);
         }
     }
+
 }

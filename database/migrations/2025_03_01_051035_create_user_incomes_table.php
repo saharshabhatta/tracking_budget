@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('user_incomes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->decimal('monthly_income', 15, 2);
-            $table->decimal('annual_income', 15, 2);
+            $table->decimal('monthly_income', 17, 4);
+            $table->decimal('annual_income', 17, 4);
             $table->integer('month');
             $table->year('year');
             $table->timestamps();

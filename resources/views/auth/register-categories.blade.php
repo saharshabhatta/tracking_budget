@@ -11,6 +11,17 @@
 <body>
 {{--@include('layouts.navbar')--}}
 <div class="container mt-5">
+
+    @if (session('errors'))
+        <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <p>{{ $error }}</p>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <h2 class="text-center mb-4">Select Categories</h2>
 
     <form action="{{ route('register.store-categories') }}" method="POST">

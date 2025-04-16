@@ -10,15 +10,15 @@
 @include('layouts.navbar')
 <div class="container mt-5">
 
-    @if(session()->has('error'))
-        <div class="alert alert-danger">
-            {{ session('error') }}
-        </div>
-    @elseif(session()->has('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
-    @endif
+{{--    @if (session('errors'))--}}
+{{--        <div class="alert alert-danger">--}}
+{{--            <ul>--}}
+{{--                @foreach ($errors->all() as $error)--}}
+{{--                    <p>{{ $error }}</p>--}}
+{{--                @endforeach--}}
+{{--            </ul>--}}
+{{--        </div>--}}
+{{--    @endif--}}
 
     <h1 class="text-center mb-4">Add New Expense</h1>
     <form method="POST" action="{{ route('expenses.store') }}">

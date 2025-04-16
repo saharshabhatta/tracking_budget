@@ -2,10 +2,9 @@
 
 namespace App\Http\Requests;
 
-use App\Rules\FutureDateRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class storeExpenseRequest extends FormRequest
+class MonthRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,17 +22,7 @@ class storeExpenseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'category_id' => 'required|exists:categories,id',
-            'amount' => 'required|numeric|min:1|max:9999999999999999.9999',
-            'description' => 'required|string',
-            'date' => ['required', 'date', new FutureDateRule()],
-        ];
-    }
-
-    public function messages(): array
-    {
-        return [
-            'amount.max' => 'The amount exceeds the maximum allowable.',
+            'month'=>'nullable|date_format:Y-m',
         ];
     }
 }

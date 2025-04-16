@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\FilterRequest;
+use App\Http\Requests\MonthRequest;
+use App\Http\Requests\storeCategoryRequest;
 use App\Models\Category;
 use App\Models\UserCategory;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class CategoryController extends Controller
@@ -15,7 +15,7 @@ class CategoryController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(MonthRequest $request)
     {
         $search = $request->query('search');
         $selectedMonth = $request->query('month', Carbon::now()->format('Y-m'));
@@ -55,7 +55,7 @@ class CategoryController extends Controller
      * Store a newly created resource in storage.
      */
 
-    public function store(FilterRequest $request)
+    public function store(storeCategoryRequest $request)
     {
         DB::beginTransaction();
 
@@ -71,27 +71,19 @@ class CategoryController extends Controller
 
             if (($totalSpent + $newPercentage) > 100) {
                 $remaining = 100 - $totalSpent;
-                session()->flash('error', "Limit exceeded! You can only allocate up to {$remaining}% more.");
-                return back()->withInput();
+                return redirect()->back()
+                    ->with('error', "Limit exceeded! You can only allocate up to {$remaining}% more.")
+                    ->withInput();
             }
 
+            $categoryName = strtolower(trim($request->name));
+
             $category = Category::withTrashed()
-                ->whereRaw('LOWER(name) = ?', [strtolower($request->name)])
+                ->whereRaw('LOWER(name) = ?', [$categoryName])
                 ->first();
 
             if ($category && $category->trashed() && $category->user_id == $userId) {
                 $category->restore();
-            }
-
-            if ($category) {
-                $alreadyLinked = UserCategory::where('user_id', $userId)
-                    ->where('category_id', $category->id)
-                    ->exists();
-
-                if ($alreadyLinked) {
-                    session()->flash('error', 'Category already exists.');
-                    return back()->withInput();
-                }
             }
 
             if (!$category) {
@@ -110,9 +102,11 @@ class CategoryController extends Controller
             DB::commit();
             return redirect('/categories')->with('success', 'Category added successfully!');
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
-            return back()->withErrors(['error' => 'Something went wrong. Please try again later.']);
+            return redirect()->back()
+                ->withErrors(['error' => 'Something went wrong. Please try again later.'])
+                ->withInput();
         }
     }
 
@@ -141,6 +135,10 @@ class CategoryController extends Controller
             ->where('category_id', $category->id)
             ->first();
 
+        if (!$user_category) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $now = Carbon::now();
 
         $totalSpent = UserCategory::where('user_id', auth()->id())
@@ -156,7 +154,7 @@ class CategoryController extends Controller
      * Update the specified resource in storage.
      */
 
-    public function update(FilterRequest $request, string $id)
+    public function update(storeCategoryRequest $request, string $id)
     {
         DB::beginTransaction();
 

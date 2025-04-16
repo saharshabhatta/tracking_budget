@@ -11,6 +11,17 @@
 <body>
 <div class="container mt-5">
     <h2 class="text-center mb-4">Personal Information</h2>
+
+    @if (session('errors'))
+        <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <p>{{ $error }}</p>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <form action="{{ route('register.personal-info') }}" method="POST">
         @csrf
 
@@ -58,7 +69,6 @@
             <label for="password_confirmation">Confirm Password:</label>
             <input type="password" class="form-control" name="password_confirmation" required>
         </div>
-
 
         <button type="submit" class="btn btn-primary btn-block">Next</button>
     </form>
