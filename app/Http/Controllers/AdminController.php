@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\FilterRequest;
+use App\Http\Requests\MonthRequest;
 use App\Http\Requests\storeCategoryNameRequest;
 use App\Models\Category;
 use App\Models\Role;
@@ -38,14 +39,7 @@ class AdminController extends Controller
         return view('admin.dashboard', compact('averageIncome', 'totalUsers', 'categoriesSpending', 'categoriesWithMostUsers'));
     }
 
-    public function showUsers()
-    {
-        $users = User::paginate(10);
-        $totalUsers = User::count();
-        return view('admin.users', compact('users', 'totalUsers'));
-    }
-
-    public function search(Request $request)
+    public function showUsers(Request $request)
     {
         $query = User::query();
         $totalUsers = User::count();
@@ -60,11 +54,30 @@ class AdminController extends Controller
         }
 
         $users = $query->paginate(10)->appends($request->all());
+
         return view('admin.users', compact('users', 'totalUsers'));
     }
 
+//    public function search(Request $request)
+//    {
+//        $query = User::query();
+//        $totalUsers = User::count();
+//
+//        if ($request->has('search') && $request->search != '') {
+//            $query->where(function ($subQuery) use ($request) {
+//                $subQuery->where('first_name', 'like', '%' . $request->search . '%')
+//                    ->orWhere('last_name', 'like', '%' . $request->search . '%')
+//                    ->orWhere('email', 'like', '%' . $request->search . '%')
+//                    ->orWhere('phone', 'like', '%' . $request->search . '%');
+//            });
+//        }
+//
+//        $users = $query->paginate(10)->appends($request->all());
+//        return view('admin.users', compact('users', 'totalUsers'));
+//    }
 
-    public function displayCategories(FilterRequest $request) {
+    public function displayCategories(FilterRequest $request)
+    {
         $searchTerm = $request->input('search', '');
 
         $categories = DB::table('categories')
@@ -82,14 +95,18 @@ class AdminController extends Controller
             ->groupBy('categories.id', 'categories.name', 'categories.user_id', 'categories.created_at', 'users.first_name');
 
         if ($searchTerm) {
-            $categories->where('categories.name', 'like', '%' . $searchTerm . '%')
-                ->orWhere('users.first_name', 'like', '%' . $searchTerm . '%');
+            $categories->where(function ($query) use ($searchTerm) {
+                $query->where('categories.name', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('users.first_name', 'like', '%' . $searchTerm . '%');
+            });
         }
 
         if ($request->has('from') && $request->has('to') && $request->from && $request->to) {
-            $categories->whereBetween('categories.created_at', [$request->from, $request->to]);
-        }
+            $from = $request->input('from') . ' 00:00:00';
+            $to = $request->input('to') . ' 23:59:59';
 
+            $categories->whereBetween('categories.created_at', [$from, $to]);
+        }
 
         $categories = $categories->paginate(5)->withQueryString();
 
@@ -129,7 +146,7 @@ class AdminController extends Controller
         }
     }
 
-    public function showUserCategories(Request $request, $userId)
+    public function showUserCategories(MonthRequest $request, $userId)
     {
         $searchTerm = $request->get('search', '');
         $selectedMonth = $request->get('month', now()->format('Y-m'));
@@ -152,7 +169,6 @@ class AdminController extends Controller
         return view('admin.showUserCategories', compact('categories', 'selectedMonth', 'searchTerm', 'user'));
     }
 
-
     public function editCategory($id) {
         $category = Category::findOrFail($id);
 
@@ -160,7 +176,6 @@ class AdminController extends Controller
 
         return view('admin.editCategory', compact('category', 'userCount'));
     }
-
 
     public function updateCategory(Request $request, $id)
     {
@@ -190,7 +205,6 @@ class AdminController extends Controller
         }
     }
 
-
     public function destroyCategory(string $id) {
         try {
             $category = Category::findOrFail($id);
@@ -200,5 +214,4 @@ class AdminController extends Controller
             return redirect()->route('admin.categories')->with('error', 'Something went wrong while deleting the category.');
         }
     }
-
 }

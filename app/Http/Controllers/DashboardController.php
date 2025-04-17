@@ -14,8 +14,8 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        $currentMonth = Carbon::now()->month;
-        $currentYear = Carbon::now()->year;
+//        $currentMonth = Carbon::now()->month;
+//        $currentYear = Carbon::now()->year;
 
         $selectedMonthYear = $request->query('month');
         $selectedMonth = $selectedMonthYear ? (int) substr($selectedMonthYear, 5, 2) : Carbon::now()->month;
@@ -191,13 +191,13 @@ class DashboardController extends Controller
         return $actualAmounts;
     }
 
-    public function hasCategoriesForCurrentMonth($user, $currentMonth, $currentYear)
-    {
-        return UserCategory::where('user_id', $user->id)
-            ->whereMonth('create_date', $currentMonth)
-            ->whereYear('create_date', $currentYear)
-            ->exists();
-    }
+//    public function hasCategoriesForCurrentMonth($user, $currentMonth, $currentYear)
+//    {
+//        return UserCategory::where('user_id', $user->id)
+//            ->whereMonth('create_date', $currentMonth)
+//            ->whereYear('create_date', $currentYear)
+//            ->exists();
+//    }
 
     public function getMonths()
     {

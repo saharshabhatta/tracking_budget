@@ -14,8 +14,7 @@
 <div class="container mt-5">
     <h1 class="mb-4">Roles List</h1>
 
-    <form method="POST" action="{{ route('roles.search') }}" class="mb-4">
-        @csrf
+    <form method="GET" action="{{ route('roles.index') }}" class="mb-4">
         <div class="row">
             <div class="col-md-3">
                 <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="Search Roles">

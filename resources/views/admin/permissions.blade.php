@@ -11,8 +11,7 @@
 <div class="container">
     <h2>Assign Permissions to Roles</h2>
 
-    <form method="POST" action="{{ route('permissions.search') }}" class="mb-4">
-        @csrf
+    <form method="GET" action="{{ route('admin.assign-permissions') }}" class="mb-4">
         <div class="row">
             <div class="col-md-3">
                 <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="Search Permissions">

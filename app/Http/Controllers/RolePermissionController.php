@@ -12,17 +12,35 @@ use Illuminate\Support\Facades\DB;
 
 class RolePermissionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $roles = Role::where('name', '!=', 'Super_admin')->get();
-        $permissions = Permission::all();
+        $query = Permission::query();
 
-        return view('admin.permissions', compact('roles', 'permissions'));
+        if ($request->has('search') && $request->search != '') {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        $permissions = $query->get();
+        $roles = Role::where('name', '!=', 'Super_admin')->get();
+
+        return view('admin.permissions', compact('permissions', 'roles'));
     }
 
-    /**
-     * Update the permissions for a given role.
-     */
+
+//    public function search(Request $request){
+//        $query = Permission::query();
+//        $roles = Role::all();
+//        if ($request->has('search') && $request->search != '') {
+//            $query->where(function ($subQuery) use ($request) {
+//                $subQuery->where('name', 'like', '%' . $request->search . '%');
+//            });
+//        }
+//
+//        $permissions = $query->get();
+//        return view('admin.permissions', compact('permissions', 'roles'));
+//    }
+
+
     public function update(Request $request)
     {
 //        dd('Update function triggered');
@@ -46,17 +64,4 @@ class RolePermissionController extends Controller
         }
     }
 
-
-    public function search(Request $request){
-        $query = Permission::query();
-        $roles = Role::all();
-        if ($request->has('search') && $request->search != '') {
-            $query->where(function ($subQuery) use ($request) {
-                $subQuery->where('name', 'like', '%' . $request->search . '%');
-            });
-        }
-
-        $permissions = $query->get();
-        return view('admin.permissions', compact('permissions', 'roles'));
-    }
 }

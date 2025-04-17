@@ -33,8 +33,15 @@ class IncomeController extends Controller
         $query = UserIncome::where('user_id', Auth::id());
 
         if ($request->has('from') && $request->has('to') && $request->from && $request->to) {
-            $query->whereBetween('created_at', [$request->from, $request->to]);
+            $from = $request->input('from') . ' 00:00:00';
+            $to = $request->input('to') . ' 23:59:59';
+
+            $query->whereBetween('created_at', [$from, $to]);
         }
+
+//        if ($request->has('from') && $request->has('to') && $request->from && $request->to) {
+//            $query->whereBetween('created_at', [$request->from, $request->to]);
+//        }
 
         $income = $query->orderBy('month', 'desc')->paginate(10);
 

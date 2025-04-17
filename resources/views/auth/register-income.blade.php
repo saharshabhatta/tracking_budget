@@ -10,15 +10,15 @@
 <body>
 
 <div class="container mt-5">
-{{--    @if (session('errors'))--}}
-{{--        <div class="alert alert-danger">--}}
-{{--            <ul>--}}
-{{--                @foreach ($errors->all() as $error)--}}
-{{--                    <p>{{ $error }}</p>--}}
-{{--                @endforeach--}}
-{{--            </ul>--}}
-{{--        </div>--}}
-{{--    @endif--}}
+    @if (session('errors'))
+        <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <p>{{ $error }}</p>
+                @endforeach
+            </ul>
+        </div>
+    @endif
     <h2 class="text-center mb-4">Income and Category Percentages</h2>
 
     <form id="incomeForm" action="{{ route('register.store-incomes') }}" method="POST">

@@ -10,15 +10,9 @@ use Illuminate\Support\Facades\DB;
 
 class RoleController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $roles = Role::where('name', '!=', 'super_admin')->paginate(10);
-        return view('roles.index', compact('roles'));
-    }
-
-    public function search(Request $request)
-    {
-        $query = Role::query();
+        $query = Role::where('name', '!=', 'super_admin');
 
         if ($request->has('search') && $request->search != '') {
             $query->where('name', 'like', '%' . $request->search . '%');
@@ -29,19 +23,37 @@ class RoleController extends Controller
         return view('roles.index', compact('roles'));
     }
 
+
+//    public function search(Request $request)
+//    {
+//        $query = Role::query();
+//
+//        if ($request->has('search') && $request->search != '') {
+//            $query->where('name', 'like', '%' . $request->search . '%');
+//        }
+//
+//        $roles = $query->paginate(10);
+//
+//        return view('roles.index', compact('roles'));
+//    }
+
     public function show(Request $request, Role $role)
     {
         $search = $request->input('search');
 
-        $users = User::when($search, function ($query, $search) {
-            return $query->where('first_name', 'like', "%{$search}%")
-                ->orWhere('email', 'like', "%{$search}%");
-        })->paginate(10);
+        $users = User::whereDoesntHave('roles', function ($query) {
+            $query->where('name', 'super_admin');
+        })
+            ->when($search, function ($query, $search) {
+                return $query->where(function($q) use ($search) {
+                    $q->where('first_name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
+            ->paginate(10);
 
         return view('roles.show', compact('role', 'users'));
     }
-
-
 
     /**
      * Update role for the user and handle errors with transactions.
@@ -105,10 +117,9 @@ class RoleController extends Controller
             DB::commit();
 
             return redirect()->route('roles.index')->with('success', 'Role created successfully!');
-        } catch (Exception $e) {
+        } catch (Exception ) {
             DB::rollBack();
             return back()->withErrors(['error' => 'Failed to create role, please try again.']);
         }
     }
-
 }

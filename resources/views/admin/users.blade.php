@@ -14,8 +14,7 @@
 <div class="container mt-4">
     <h1 class="text-center mb-4">All Users</h1>
 
-    <form method="POST" action="{{ route('users.search') }}" class="mb-4">
-        @csrf
+    <form method="GET" action="{{ route('admin.users') }}" class="mb-4">
         <div class="row">
 
             <div class="col-md-3">
@@ -28,7 +27,7 @@
         </div>
     </form>
 
-    <h4>Total User: {{ $totalUsers }}</h4>
+{{--    <h4>Total User: {{ $totalUsers }}</h4>--}}
     <div class="table-responsive">
         <table class="table table-striped table-bordered">
             <thead>
