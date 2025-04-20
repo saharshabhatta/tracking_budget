@@ -68,15 +68,20 @@ Route::middleware(['permission:admin'])->group(function () {
     Route::put('roles/{user}/assign', [RoleController::class, 'update'])->name('roles.update');
     Route::put('roles/{user}/remove', [RoleController::class, 'updateRemove'])->name('roles.updateRemove');
     Route::post('roles.search', [RoleController::class, 'search'])->name('roles.search');
-});
-
-Route::middleware(['auth'])->group(function () {
     Route::get('/admin/assign-permissions', [RolePermissionController::class, 'index'])->name('admin.assign-permissions');
     Route::post('/admin/assign-permissions', [RolePermissionController::class, 'update'])->name('admin.assign-permissions.update');
     Route::post('permissions.search', [RolePermissionController::class, 'search'])->name('permissions.search');
 });
 
-Route::get('/select-role', [AuthenticatedSessionController::class, 'selectRole'])->name('select.role');
-Route::post('/select-role', [AuthenticatedSessionController::class, 'chooseRole'])->name('choose.role');
+Route::middleware(['auth'])->group(function () {
+//    Route::get('/admin/assign-permissions', [RolePermissionController::class, 'index'])->name('admin.assign-permissions');
+//    Route::post('/admin/assign-permissions', [RolePermissionController::class, 'update'])->name('admin.assign-permissions.update');
+//    Route::post('permissions.search', [RolePermissionController::class, 'search'])->name('permissions.search');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/select-role', [AuthenticatedSessionController::class, 'selectRole'])->name('select.role');
+    Route::post('/select-role', [AuthenticatedSessionController::class, 'chooseRole'])->name('choose.role');
+});
 
 require __DIR__.'/auth.php';

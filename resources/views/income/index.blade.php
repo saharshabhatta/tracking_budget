@@ -12,8 +12,7 @@
 <div class="container mt-5">
     <h1 class="text-center mb-4">Incomes</h1>
 
-    <form method="POST" action="{{ route('incomes.filter') }}" class="mb-4">
-        @csrf
+    <form method="GET" action="{{ route('incomes.index') }}" class="mb-4">
         <div class="row">
             <div class="col-md-3">
                 <input type="date" name="from" value="{{ request('from') }}" class="form-control" placeholder="From">

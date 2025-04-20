@@ -41,7 +41,6 @@ class CheckPermission
         if ($hasPermission) {
             return $next($request);
         }
-
         abort(403, 'Unauthorized');
     }
 }

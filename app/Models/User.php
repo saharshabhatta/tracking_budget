@@ -87,10 +87,17 @@ class User extends Authenticatable
         return $this->belongsToMany(Permission::class, 'permission_role');
     }
 
-    public function getRole(){
-        return $this->roles()->first();
+    public function getRole()
+    {
+        $roleName = session('active_role');
 
+        if (!$roleName) {
+            return null;
+        }
+
+        return $this->roles()->where('name', $roleName)->first();
     }
+
     public function hasRole(string $roleName): bool {
         return $this->roles()->where('name', $roleName)->exists();
     }

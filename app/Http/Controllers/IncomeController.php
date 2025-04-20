@@ -14,21 +14,7 @@ class IncomeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        $currentMonth = now()->month;
-        $currentYear = now()->year;
-
-        $income = UserIncome::where('user_id', Auth::id())
-            ->where('year', $currentYear)
-            ->where('month', $currentMonth)
-            ->orderBy('month', 'desc')
-            ->paginate(10);
-
-        return view('income.index', compact('income'));
-    }
-
-    public function filter(FilterRequest $request)
+    public function index(FilterRequest $request)
     {
         $query = UserIncome::where('user_id', Auth::id());
 
@@ -37,16 +23,39 @@ class IncomeController extends Controller
             $to = $request->input('to') . ' 23:59:59';
 
             $query->whereBetween('created_at', [$from, $to]);
-        }
+        } else {
+            $currentMonth = now()->month;
+            $currentYear = now()->year;
 
-//        if ($request->has('from') && $request->has('to') && $request->from && $request->to) {
-//            $query->whereBetween('created_at', [$request->from, $request->to]);
-//        }
+            $query->where('year', $currentYear)
+                ->where('month', $currentMonth);
+        }
 
         $income = $query->orderBy('month', 'desc')->paginate(10);
 
         return view('income.index', compact('income'));
     }
+
+
+//    public function filter(FilterRequest $request)
+//    {
+//        $query = UserIncome::where('user_id', Auth::id());
+//
+//        if ($request->has('from') && $request->has('to') && $request->from && $request->to) {
+//            $from = $request->input('from') . ' 00:00:00';
+//            $to = $request->input('to') . ' 23:59:59';
+//
+//            $query->whereBetween('created_at', [$from, $to]);
+//        }
+
+//        if ($request->has('from') && $request->has('to') && $request->from && $request->to) {
+//            $query->whereBetween('created_at', [$request->from, $request->to]);
+//        }
+
+//        $income = $query->orderBy('month', 'desc')->paginate(10);
+//
+//        return view('income.index', compact('income'));
+//    }
 
     /**
      * Show the form for creating a new resource.

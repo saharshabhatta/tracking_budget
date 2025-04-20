@@ -15,7 +15,25 @@
 
 <div class="container mt-5">
     <h2 class="text-center mb-4">Transactions</h2>
-
+    <form method="GET" action="{{ route('transactions.index') }}" class="mb-4">
+        <div class="row">
+            <div class="col-md-3">
+                <input type="date" name="from" value="{{ request('from') }}" class="form-control" placeholder="From">
+                @error('from')
+                <div class="text-danger">{{ $message }}</div>
+                @enderror
+            </div>
+            <div class="col-md-3">
+                <input type="date" name="to" value="{{ request('to') }}" class="form-control" placeholder="To">
+                @error('to')
+                <div class="text-danger">{{ $message }}</div>
+                @enderror
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-secondary w-100">Filter</button>
+            </div>
+        </div>
+    </form>
     <div class="row">
         @forelse($transactions as $transaction)
             <div class="col-12 mb-4">
@@ -23,8 +41,20 @@
                     <div class="card-header">
                         @if($transaction->type == 'income')
                             <h5 class="card-title text-success">Income</h5>
-                        @else
+                            <a href="{{ route('incomes.edit', $transaction->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                            <form action="{{ route('incomes.destroy', $transaction->id) }}" method="POST" style="display:inline;">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            </form>
+                            @else
                             <h5 class="card-title text-danger">Expense (Category: {{ $transaction->category->name ?? 'N/A' }})</h5>
+                            <a href="{{ route('expenses.edit', $transaction->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                            <form action="{{ route('expenses.destroy', $transaction->id) }}" method="POST" style="display:inline;">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            </form>
                         @endif
                     </div>
                     <div class="card-body">

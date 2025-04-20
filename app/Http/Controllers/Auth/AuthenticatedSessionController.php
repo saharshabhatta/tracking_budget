@@ -47,11 +47,8 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        // If it's any other role, redirect to the intended route
         return redirect()->intended(route('dashboard', absolute: false));
     }
-
-
 
     public function selectRole()
     {

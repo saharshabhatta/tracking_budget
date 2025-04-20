@@ -50,7 +50,6 @@ class ExpenseController extends Controller
     }
 
 
-
 //    public function filter(Request $request)
 //    {
 //        $query = Expense::with('category')->where('user_id', auth()->id());
@@ -85,8 +84,6 @@ class ExpenseController extends Controller
 
         return view('expenses.create', compact('userCategories'));
     }
-
-
 
     /**
      * Store a newly created resource in storage.
