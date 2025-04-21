@@ -54,8 +54,10 @@
                 <td>{{ Carbon::createFromFormat('m', $inc->month)->format('F') }}</td>
                 <td>{{ $inc->year }}</td>
                 <td>
-                    <a href="{{ route('incomes.edit', $inc->id) }}" class="btn btn-warning btn-sm">Edit</a>
-                    <form action="{{ route('incomes.destroy', $inc->id) }}" method="POST" style="display:inline;">
+                    <a href="{{ route('incomes.edit', $inc->id) }}" class="btn btn-warning btn-sm"
+                        onclick="return confirm('Are you sure you want to edit this category?');">Edit</a>
+                    <form action="{{ route('incomes.destroy', $inc->id) }}" method="POST" style="display:inline;"
+                        onsubmit="return confirm('Are you sure you want to delete this category?');">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-danger btn-sm">Delete</button>

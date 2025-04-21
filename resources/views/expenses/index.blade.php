@@ -66,8 +66,10 @@
                             <td>{{ $expense->amount }}</td>
                             <td>{{ Carbon::parse($expense->date)->format('d M Y') }}</td>
                             <td>
-                                <a href="{{ route('expenses.edit', $expense->id) }}" class="btn btn-warning btn-sm">Edit</a>
-                                <form action="{{ route('expenses.destroy', $expense->id) }}" method="POST" style="display:inline;">
+                                <a href="{{ route('expenses.edit', $expense->id) }}" class="btn btn-warning btn-sm"
+                                   onclick="return confirm('Are you sure you want to edit this category?');">Edit</a>
+                                <form action="{{ route('expenses.destroy', $expense->id) }}"  method="POST" style="display:inline;"
+                                      onsubmit="return confirm('Are you sure you want to delete this category?');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-danger btn-sm">Delete</button>

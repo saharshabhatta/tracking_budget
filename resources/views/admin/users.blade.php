@@ -11,63 +11,70 @@
 
 <body class="bg-light">
 @include('layouts.adminNavbar')
-<div class="container mt-4">
-    <h1 class="text-center mb-4">All Users</h1>
 
-    <form method="GET" action="{{ route('admin.users') }}" class="mb-4">
-        <div class="row">
+<div class="container mt-5">
+    <h1 class="text-center mb-5">All Users</h1>
 
-            <div class="col-md-3">
-                <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="Search Users">
+    <div class="card p-4 mb-4">
+        <form method="GET" action="{{ route('admin.users') }}">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-6">
+                    <input type="text" name="search" value="{{ request('search') }}" class="form-control" id="search" placeholder="Search Users">
+                </div>
+                <div class="col-md-3 d-grid">
+                    <button type="submit" class="btn btn-outline-primary">Search</button>
+                </div>
             </div>
+        </form>
+    </div>
 
-            <div class="col-md-3">
-                <button type="submit" class="btn btn-secondary w-100">Search</button>
-            </div>
-        </div>
-    </form>
+    {{-- <h4>Total User: {{ $totalUsers }}</h4> --}}
 
-{{--    <h4>Total User: {{ $totalUsers }}</h4>--}}
-    <div class="table-responsive">
-        <table class="table table-striped table-bordered">
-            <thead>
-            <tr>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Action</th>
-            </tr>
-            </thead>
-            <tbody>
-            @foreach($users as $user)
+    <div class="card p-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle table-bordered table-striped">
+                <thead class="table-dark">
                 <tr>
-                    <td>{{ $user->first_name }}</td>
-                    <td>{{ $user->last_name }}</td>
-                    <td>{{ $user->email }}</td>
-                    <td>{{ $user->phone }}</td>
-                    <td>
-                        <a href="{{ url('/admin/user/' . $user->id . '/categories') }}" class="btn btn-info">View Categories</a>
-                    </td>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Action</th>
                 </tr>
-            @endforeach
-            </tbody>
-        </table>
-        <div class="d-flex justify-content-between align-items-center mt-4">
-            @if ($users->onFirstPage())
-                <span class="btn btn-outline-secondary disabled">← Previous</span>
-            @else
-                <a href="{{ $users->previousPageUrl() }}" class="btn btn-outline-primary">← Previous</a>
-            @endif
+                </thead>
+                <tbody>
+                @foreach($users as $user)
+                    <tr>
+                        <td>{{ $user->first_name }}</td>
+                        <td>{{ $user->last_name }}</td>
+                        <td>{{ $user->email }}</td>
+                        <td>{{ $user->phone }}</td>
+                        <td>
+                            <a href="{{ url('/admin/user/' . $user->id . '/categories') }}" class="btn btn-sm btn-info">
+                                View Categories
+                            </a>
+                        </td>
+                    </tr>
+                @endforeach
+                </tbody>
+            </table>
 
-            @if ($users->hasMorePages())
-                <a href="{{ $users->nextPageUrl() }}" class="btn btn-outline-primary">Next →</a>
-            @else
-                <span class="btn btn-outline-secondary disabled">Next →</span>
-            @endif
+            <div class="d-flex justify-content-between mt-4">
+                @if ($users->onFirstPage())
+                    <span class="btn btn-outline-secondary disabled">← Previous</span>
+                @else
+                    <a href="{{ $users->previousPageUrl() }}" class="btn btn-outline-primary">← Previous</a>
+                @endif
+
+                @if ($users->hasMorePages())
+                    <a href="{{ $users->nextPageUrl() }}" class="btn btn-outline-primary">Next →</a>
+                @else
+                    <span class="btn btn-outline-secondary disabled">Next →</span>
+                @endif
+            </div>
         </div>
-
     </div>
 </div>
+
 </body>
 </html>

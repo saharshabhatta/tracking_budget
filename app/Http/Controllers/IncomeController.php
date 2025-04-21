@@ -8,6 +8,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class IncomeController extends Controller
 {
@@ -122,9 +123,11 @@ class IncomeController extends Controller
     public function edit(string $id)
     {
         $income = UserIncome::findOrFail($id);
-        if ($income->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized action.');
+
+        if (! Gate::allows('update-income', $income)) {
+            abort(403);
         }
+
         return view('income.edit', compact('income'));
     }
 
@@ -135,8 +138,11 @@ class IncomeController extends Controller
     {
         $request->validate([
             'income_type' => ['required', 'in:monthly,annual'],
-            'monthly_income' => ['nullable', 'numeric', 'min:0', 'required_if:income_type,monthly'],
-            'annual_income' => ['nullable', 'numeric', 'min:0', 'required_if:income_type,annual'],
+            'monthly_income' => ['nullable', 'numeric', 'min:0', 'required_if:income_type,monthly', 'max:9999999999999999.9999',],
+            'annual_income' => ['nullable', 'numeric', 'min:0', 'required_if:income_type,annual', 'max:9999999999999999.9999',],
+        ], [
+            'monthly_income.max' => 'The monthly income exceeds the maximum allowable.',
+            'annual_income.max' => 'The annual income exceeds the maximum allowable value .',
         ]);
 
         $monthlyIncome = $request->income_type === 'monthly'

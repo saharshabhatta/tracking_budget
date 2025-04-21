@@ -41,16 +41,20 @@
                     <div class="card-header">
                         @if($transaction->type == 'income')
                             <h5 class="card-title text-success">Income</h5>
-                            <a href="{{ route('incomes.edit', $transaction->id) }}" class="btn btn-warning btn-sm">Edit</a>
-                            <form action="{{ route('incomes.destroy', $transaction->id) }}" method="POST" style="display:inline;">
+                            <a href="{{ route('incomes.edit', $transaction->id) }}" class="btn btn-warning btn-sm"
+                               onclick="return confirm('Are you sure you want to edit this category?');">Edit</a>
+                            <form action="{{ route('incomes.destroy', $transaction->id) }}" method="POST" style="display:inline;"
+                                  onsubmit="return confirm('Are you sure you want to delete this category?');">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                             </form>
                             @else
                             <h5 class="card-title text-danger">Expense (Category: {{ $transaction->category->name ?? 'N/A' }})</h5>
-                            <a href="{{ route('expenses.edit', $transaction->id) }}" class="btn btn-warning btn-sm">Edit</a>
-                            <form action="{{ route('expenses.destroy', $transaction->id) }}" method="POST" style="display:inline;">
+                            <a href="{{ route('expenses.edit', $transaction->id) }}" class="btn btn-warning btn-sm"
+                               onclick="return confirm('Are you sure you want to edit this category?');">Edit</a>
+                            <form action="{{ route('expenses.destroy', $transaction->id) }}" method="POST" style="display:inline;"
+                                  onsubmit="return confirm('Are you sure you want to delete this category?');">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-danger btn-sm">Delete</button>

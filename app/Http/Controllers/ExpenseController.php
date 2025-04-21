@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class ExpenseController extends Controller
 {
@@ -131,8 +132,12 @@ class ExpenseController extends Controller
 
         $user_categories=$expense->category;
 
-        if ($expense->user_id != auth()->id()) {
-            abort(401);
+//        if ($expense->user_id != auth()->id()) {
+//            abort(401);
+//        }
+
+        if (! Gate::allows('update-expense', $expense)) {
+            abort(403);
         }
 
         $categories = Category::whereHas('users', function($query) use ($expense) {
