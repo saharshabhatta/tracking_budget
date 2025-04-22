@@ -37,7 +37,6 @@ class IncomeController extends Controller
         return view('income.index', compact('income'));
     }
 
-
 //    public function filter(FilterRequest $request)
 //    {
 //        $query = UserIncome::where('user_id', Auth::id());

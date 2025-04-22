@@ -62,7 +62,7 @@ class RegisteredUserController extends Controller
 
             DB::commit();
             return redirect()->route('register.categories');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             return back()->withErrors(['error' => 'Registration failed, please try again.']);
         }
@@ -120,7 +120,7 @@ class RegisteredUserController extends Controller
 
             DB::commit();
             return redirect()->route('register.incomes');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             return back()->withErrors(['error' => 'Failed to store categories, please try again.']);
         }
